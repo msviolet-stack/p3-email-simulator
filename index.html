@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Email Practice Simulator</title>
+  <title>Email Writing Simulator</title>
   <style>
     :root{
       --bg:#f6f8fc;
@@ -112,12 +112,14 @@
       gap: 10px;
       padding: 8px 0;
       border-bottom: 1px solid var(--line);
+      align-items:center;
     }
     .row:last-of-type{ border-bottom:none; }
+
     .label{
       color: var(--muted);
       font-size: 14px;
-      padding-top: 8px;
+      padding-top: 2px;
     }
     .field, select, textarea{
       width: 100%;
@@ -140,12 +142,39 @@
       background-repeat: no-repeat;
       cursor:pointer;
     }
+
     textarea{
       min-height: 260px;
       resize: vertical;
       line-height: 1.4;
       border-top: 1px solid var(--line);
       padding: 14px 4px 8px;
+    }
+
+    .toWrap{
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .toWrap .leftSide{ flex: 1; }
+
+    .toActions{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-size:14px;
+      color: var(--muted);
+      white-space: nowrap;
+      user-select:none;
+    }
+    .toLink{
+      cursor:pointer;
+      padding: 4px 6px;
+      border-radius: 8px;
+    }
+    .toLink:hover{
+      background:#f3f6ff;
+      color: #2b2b2b;
     }
 
     .actions{
@@ -198,39 +227,63 @@
 <body>
   <div class="page">
     <div class="topbar">
-      <div class="title">✉️Email Writing Simulator <span class="pill">For practice only</span></div>
+      <div class="title">✉️ Email Writing Simulator <span class="pill">Practice email • Not sent to anyone</span></div>
       <div class="pill">No sign-in needed</div>
     </div>
 
     <div class="warn">
-      <strong>⚠️ Safety reminder:</strong> Never send your passwords, phone number, home address, or NRIC in an email.
-If you’re unsure, ask a teacher or parent first.
+      <strong>⚠️ Safety reminder:</strong> Do not type passwords, phone numbers, home addresses, or NRIC.
     </div>
 
     <div class="compose" aria-label="Email compose simulator">
       <div class="composeHeader">
         <div class="left"><span class="dot"></span>New Message</div>
         <div class="right">
-          <span class="icon" title="Minimize">—</span>
-          <span class="icon" title="Expand">▢</span>
-          <span class="icon" title="Close">✕</span>
+          <span class="icon" id="minBtn" title="Minimise: Hide the email box (it’s still there).">—</span>
+          <span class="icon" id="expBtn" title="Expand: Make the email box bigger.">▢</span>
+          <span class="icon" id="closeBtn" title="Close: Close the email box (your writing will disappear).">✕</span>
         </div>
       </div>
 
-      <div class="rows">
-        <div class="row">
-          <div class="label">From</div>
-          <input class="field" id="from" value="student@school.edu" readonly />
-        </div>
-
+      <div class="rows" id="composeBody">
+        <!-- To row with Gmail-style Cc/Bcc -->
         <div class="row">
           <div class="label">To</div>
-          <select id="to">
-            <option>🧑‍🏫 formteacher@school.edu (Teacher)</option>
-            <option>🏫 schooloffice@school.edu (School Office)</option>
-            <option>👨‍💼 principal@school.edu (Principal)</option>
-            <option>👫 friend@school.edu (Friend)</option>
-          </select>
+
+          <div class="toWrap">
+            <div class="leftSide">
+              <select id="to" class="field">
+                <option>🧑‍🏫 formteacher@school.edu (Teacher)</option>
+                <option>🏫 schooloffice@school.edu (School Office)</option>
+                <option>👨‍💼 principal@school.edu (Principal)</option>
+                <option>👫 friend@school.edu (Friend)</option>
+              </select>
+            </div>
+
+            <div class="toActions">
+              <span class="toLink" id="ccToggle"
+                title="Cc: Other people will also get this email, and everyone can see their names.">
+                Cc
+              </span>
+              <span class="toLink" id="bccToggle"
+                title="Bcc: Other people will get this email, but their names are hidden from others.">
+                Bcc
+              </span>
+              <span title="People: Add more people to the email.">👥</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hidden CC row -->
+        <div class="row" id="ccRow" style="display:none;">
+          <div class="label">Cc</div>
+          <input class="field" id="cc" />
+        </div>
+
+        <!-- Hidden BCC row -->
+        <div class="row" id="bccRow" style="display:none;">
+          <div class="label">Bcc</div>
+          <input class="field" id="bcc" />
         </div>
 
         <div class="row">
@@ -239,7 +292,7 @@ If you’re unsure, ask a teacher or parent first.
         </div>
 
         <div>
-          <textarea id="message" placeholder=""></textarea>
+          <textarea id="message"></textarea>
         </div>
       </div>
 
@@ -270,7 +323,7 @@ If you’re unsure, ask a teacher or parent first.
       const hasFrom = /\bfrom\s*,?/i.test(message);
 
       // Safety checks
-      const hasPhoneLike = /\b\d{8}\b/.test(message);
+      const hasPhoneLike = /\b\d{8}\b/.test(message); // 8 digits (common phone length)
       const hasNricLike = /\b[STFG]\d{7}[A-Z]\b/i.test(message);
 
       // Stars (positives)
@@ -306,6 +359,45 @@ If you’re unsure, ask a teacher or parent first.
       out.scrollIntoView({ behavior: "smooth", block: "start" });
     }
 
+    // Show CC / BCC rows when clicked
+    document.getElementById("ccToggle").addEventListener("click", () => {
+      document.getElementById("ccRow").style.display = "grid";
+      document.getElementById("cc").focus();
+    });
+
+    document.getElementById("bccToggle").addEventListener("click", () => {
+      document.getElementById("bccRow").style.display = "grid";
+      document.getElementById("bcc").focus();
+    });
+
+    // Minimise / Expand / Close (visual only)
+    const composeBody = document.getElementById("composeBody");
+    const output = document.getElementById("output");
+
+    document.getElementById("minBtn").addEventListener("click", () => {
+      // Hide the body (like minimise)
+      composeBody.style.display = (composeBody.style.display === "none") ? "block" : "none";
+    });
+
+    document.getElementById("expBtn").addEventListener("click", () => {
+      // Toggle bigger/smaller by changing max width
+      const page = document.querySelector(".page");
+      if (page.style.maxWidth === "1180px") page.style.maxWidth = "980px";
+      else page.style.maxWidth = "1180px";
+    });
+
+    document.getElementById("closeBtn").addEventListener("click", () => {
+      // Close = clear everything and hide feedback
+      document.getElementById("subject").value = "";
+      document.getElementById("message").value = "";
+      document.getElementById("cc").value = "";
+      document.getElementById("bcc").value = "";
+      document.getElementById("ccRow").style.display = "none";
+      document.getElementById("bccRow").style.display = "none";
+      output.style.display = "none";
+      output.textContent = "";
+    });
+
     document.getElementById("checkBtn").addEventListener("click", () => {
       const subject = document.getElementById("subject").value;
       const message = document.getElementById("message").value;
@@ -323,9 +415,12 @@ If you’re unsure, ask a teacher or parent first.
     document.getElementById("clearBtn").addEventListener("click", () => {
       document.getElementById("subject").value = "";
       document.getElementById("message").value = "";
-      const out = document.getElementById("output");
-      out.style.display = "none";
-      out.textContent = "";
+      document.getElementById("cc").value = "";
+      document.getElementById("bcc").value = "";
+      document.getElementById("ccRow").style.display = "none";
+      document.getElementById("bccRow").style.display = "none";
+      output.style.display = "none";
+      output.textContent = "";
     });
   </script>
 </body>
