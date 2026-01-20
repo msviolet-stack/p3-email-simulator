@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Email Writing Simulator</title>
+
   <style>
     :root{
       --bg:#f6f8fc;
@@ -18,17 +19,20 @@
       --radius: 16px;
     }
     *{ box-sizing:border-box; }
+
     body{
       margin:0;
       font-family: Arial, sans-serif;
       background: var(--bg);
       color: var(--text);
     }
+
     .page{
       max-width: 980px;
       margin: 18px auto;
       padding: 0 14px;
     }
+
     .topbar{
       display:flex;
       align-items:center;
@@ -36,6 +40,7 @@
       gap:12px;
       margin-bottom: 12px;
     }
+
     .title{
       font-size: 18px;
       font-weight: 800;
@@ -43,6 +48,7 @@
       align-items:center;
       gap:10px;
     }
+
     .pill{
       font-size: 12px;
       color: var(--muted);
@@ -50,8 +56,8 @@
       border: 1px solid #d7e3fd;
       border-radius: 999px;
       padding: 6px 10px;
-      line-height: 1;
     }
+
     .warn{
       margin: 10px 0 14px;
       padding: 10px 12px;
@@ -62,7 +68,6 @@
       font-size: 14px;
     }
 
-    /* Gmail-like compose card */
     .compose{
       background: var(--card);
       border: 1px solid var(--line);
@@ -70,6 +75,7 @@
       box-shadow: var(--shadow);
       overflow:hidden;
     }
+
     .composeHeader{
       padding: 12px 14px;
       border-bottom: 1px solid var(--line);
@@ -78,27 +84,38 @@
       justify-content:space-between;
       background: #fbfbff;
     }
+
     .composeHeader .left{
       display:flex;
       align-items:center;
       gap:10px;
       font-weight: 800;
     }
+
     .dot{
-      width:10px; height:10px; border-radius:50%;
+      width:10px;
+      height:10px;
+      border-radius:50%;
       background: #34a853;
       border: 1px solid #2c8f46;
     }
+
     .composeHeader .right{
-      display:flex; gap:10px; color: var(--muted); font-size: 14px;
-      user-select:none;
+      display:flex;
+      gap:10px;
+      color: var(--muted);
+      font-size: 14px;
     }
+
     .icon{
-      width: 28px; height: 28px;
+      width: 28px;
+      height: 28px;
       border-radius: 999px;
-      display:grid; place-items:center;
+      display:grid;
+      place-items:center;
       border: 1px solid transparent;
     }
+
     .icon:hover{
       border-color: var(--line);
       background: #f3f6ff;
@@ -106,6 +123,7 @@
     }
 
     .rows{ padding: 6px 14px 14px; }
+
     .row{
       display:grid;
       grid-template-columns: 80px 1fr;
@@ -114,13 +132,14 @@
       border-bottom: 1px solid var(--line);
       align-items:center;
     }
+
     .row:last-of-type{ border-bottom:none; }
 
     .label{
       color: var(--muted);
       font-size: 14px;
-      padding-top: 2px;
     }
+
     .field, select, textarea{
       width: 100%;
       font-size: 16px;
@@ -128,19 +147,17 @@
       outline: none;
       background: transparent;
       padding: 6px 4px;
-      color: var(--text);
     }
+
     select{
       appearance:none;
-      -webkit-appearance:none;
-      -moz-appearance:none;
       padding-right: 22px;
-      background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%),
-                        linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+      background-image:
+        linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+        linear-gradient(135deg, var(--muted) 50%, transparent 50%);
       background-position: calc(100% - 14px) 50%, calc(100% - 9px) 50%;
-      background-size: 5px 5px, 5px 5px;
+      background-size: 5px 5px;
       background-repeat: no-repeat;
-      cursor:pointer;
     }
 
     textarea{
@@ -156,7 +173,6 @@
       align-items:center;
       gap:10px;
     }
-    .toWrap .leftSide{ flex: 1; }
 
     .toActions{
       display:flex;
@@ -165,263 +181,187 @@
       font-size:14px;
       color: var(--muted);
       white-space: nowrap;
-      user-select:none;
     }
+
     .toLink{
-      cursor:pointer;
+      cursor:default;
       padding: 4px 6px;
       border-radius: 8px;
-    }
-    .toLink:hover{
-      background:#f3f6ff;
-      color: #2b2b2b;
     }
 
     .actions{
       display:flex;
-      align-items:center;
       justify-content:space-between;
-      gap:12px;
       padding: 12px 14px;
       border-top: 1px solid var(--line);
       background: #fbfbff;
     }
+
     .btn{
-      border: 0;
       border-radius: 999px;
       padding: 10px 16px;
       font-size: 15px;
+      border: 0;
       cursor:pointer;
     }
+
     .btnPrimary{
       background: var(--accent);
       color: white;
       font-weight: 700;
     }
-    .btnPrimary:hover{ filter: brightness(0.95); }
+
     .btnGhost{
       background: transparent;
       border: 1px solid var(--line);
-      color: var(--text);
     }
-    .btnGhost:hover{ background:#f3f6ff; }
 
     .result{
       margin-top: 14px;
       padding: 14px;
       border-radius: 14px;
       border: 1px solid var(--line);
-      background: #ffffff;
-      box-shadow: 0 1px 2px rgba(0,0,0,.04);
+      background: white;
       white-space: pre-wrap;
-      font-size: 15px;
-    }
-
-    @media (max-width: 560px){
-      .row{ grid-template-columns: 60px 1fr; }
-      .label{ font-size: 13px; }
     }
   </style>
 </head>
 
 <body>
-  <div class="page">
-    <div class="topbar">
-      <div class="title">✉️ Email Writing Simulator <span class="pill">Practice email • Not sent to anyone</span></div>
-      <div class="pill">No sign-in needed</div>
+<div class="page">
+
+  <div class="topbar">
+    <div class="title">
+      ✉️ Email Writing Simulator
+      <span class="pill">Practice email • Not sent to anyone</span>
     </div>
-
-    <div class="warn">
-      <strong>⚠️ Safety reminder:</strong> Do not type passwords, phone numbers, home addresses, or NRIC.
-    </div>
-
-    <div class="compose" aria-label="Email compose simulator">
-      <div class="composeHeader">
-        <div class="left"><span class="dot"></span>New Message</div>
-        <div class="right">
-          <span class="icon" id="minBtn" title="Minimise: Hide the email box (it’s still there).">—</span>
-          <span class="icon" id="expBtn" title="Expand: Make the email box bigger.">▢</span>
-          <span class="icon" id="closeBtn" title="Close: Close the email box (your writing will disappear).">✕</span>
-        </div>
-      </div>
-
-      <div class="rows" id="composeBody">
-        <!-- To row with Gmail-style Cc/Bcc -->
-        <div class="row">
-          <div class="label">To</div>
-
-          <div class="toWrap">
-            <div class="leftSide">
-              <select id="to" class="field">
-                <option>🧑‍🏫 formteacher@school.edu (Teacher)</option>
-                <option>🏫 schooloffice@school.edu (School Office)</option>
-                <option>👨‍💼 principal@school.edu (Principal)</option>
-                <option>👫 friend@school.edu (Friend)</option>
-              </select>
-            </div>
-
-            <div class="toActions">
-              <span class="toLink" id="ccToggle"
-                title="Cc: Other people will also get this email, and everyone can see their names.">
-                Cc
-              </span>
-              <span class="toLink" id="bccToggle"
-                title="Bcc: Other people will get this email, but their names are hidden from others.">
-                Bcc
-              </span>
-              <span title="People: Add more people to the email.">👥</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Hidden CC row -->
-        <div class="row" id="ccRow" style="display:none;">
-          <div class="label">Cc</div>
-          <input class="field" id="cc" />
-        </div>
-
-        <!-- Hidden BCC row -->
-        <div class="row" id="bccRow" style="display:none;">
-          <div class="label">Bcc</div>
-          <input class="field" id="bcc" />
-        </div>
-
-        <div class="row">
-          <div class="label">Subject</div>
-          <input class="field" id="subject" />
-        </div>
-
-        <div>
-          <textarea id="message"></textarea>
-        </div>
-      </div>
-
-      <div class="actions">
-        <div style="display:flex; gap:10px; flex-wrap:wrap;">
-          <button class="btn btnPrimary" id="checkBtn">Send (Check)</button>
-          <button class="btn btnGhost" id="clearBtn" type="button">Discard</button>
-        </div>
-        <div class="pill">Feedback: 2 Stars + 1 Wish</div>
-      </div>
-    </div>
-
-    <div id="output" class="result" style="display:none;"></div>
+    <div class="pill">No sign-in needed</div>
   </div>
 
-  <script>
-    function quickCheck({ subject, message }) {
-      const notes = [];
-      const stars = [];
+  <div class="warn">
+    <strong>⚠️ Safety reminder:</strong>
+    Do not type passwords, phone numbers, home addresses, or NRIC.
+  </div>
 
-      const msgTrim = message.trim();
+  <div class="compose">
+    <div class="composeHeader">
+      <div class="left">
+        <span class="dot"></span> New Message
+      </div>
+      <div class="right">
+        <span class="icon" title="Minimise: Hide the email box. Your writing is still there.">—</span>
+        <span class="icon" title="Expand: Make the email box bigger.">▢</span>
+        <span class="icon" title="Close: Close the email. Your writing will disappear.">✕</span>
+      </div>
+    </div>
 
-      const subjectOk = subject.trim().length >= 3;
-      const hasGreeting = /^(dear|hi|hello)\b/i.test(msgTrim);
-      const hasPurpose = /i am writing to/i.test(message);
-      const enoughWords = msgTrim.split(/\s+/).filter(Boolean).length >= 25;
-      const hasClosing = /\bthank you\b|\bregards\b|\byours\b/i.test(message);
-      const hasFrom = /\bfrom\s*,?/i.test(message);
+    <div class="rows">
 
-      // Safety checks
-      const hasPhoneLike = /\b\d{8}\b/.test(message); // 8 digits (common phone length)
-      const hasNricLike = /\b[STFG]\d{7}[A-Z]\b/i.test(message);
+      <!-- TO -->
+      <div class="row">
+        <div class="label"
+             title="To: This is the person you are sending the email to.">
+          To
+        </div>
 
-      // Stars (positives)
-      if (subjectOk) stars.push("⭐ You wrote a subject.");
-      if (hasGreeting) stars.push("⭐ You started with a greeting.");
-      if (hasPurpose) stars.push("⭐ You stated your purpose.");
-      if (enoughWords) stars.push("⭐ You added some details.");
-      if (hasClosing) stars.push("⭐ You ended politely.");
-      if (hasFrom) stars.push("⭐ You signed off your email.");
+        <div class="toWrap">
+          <select id="to" class="field">
+            <option>🧑‍🏫 formteacher@school.edu (Teacher)</option>
+            <option>🏫 schooloffice@school.edu (School Office)</option>
+            <option>👨‍💼 principal@school.edu (Principal)</option>
+            <option>👫 friend@school.edu (Friend)</option>
+          </select>
 
-      while (stars.length < 2) stars.push("⭐ Good effort — keep improving!");
+          <div class="toActions">
+            <span class="toLink"
+                  title="Cc: Other people also get the email and everyone can see their names.">
+              Cc
+            </span>
+            <span class="toLink"
+                  title="Bcc: Other people get the email but their names are hidden.">
+              Bcc
+            </span>
+            <span title="People: This shows you can add more people.">👥</span>
+          </div>
+        </div>
+      </div>
 
-      // Improvement notes
-      if (!subjectOk) notes.push("- Add a subject (at least 3 letters).");
-      if (!hasGreeting) notes.push("- Start with a greeting (Dear / Hi / Hello).");
-      if (!hasPurpose) notes.push("- State your purpose clearly (e.g. “I am writing to …”).");
-      if (!enoughWords) notes.push("- Add more details (what / when / why).");
-      if (!hasClosing) notes.push("- End with a polite closing (e.g. Thank you).");
-      if (!hasFrom) notes.push("- End with “From,” and your name.");
+      <!-- SUBJECT -->
+      <div class="row">
+        <div class="label"
+             title="Subject: A short title to tell what your email is about.">
+          Subject
+        </div>
+        <input id="subject" class="field" />
+      </div>
 
-      if (hasPhoneLike) notes.push("- Remove phone numbers (safety rule).");
-      if (hasNricLike) notes.push("- Remove NRIC-like information (safety rule).");
+      <!-- MESSAGE -->
+      <div>
+        <textarea id="message"></textarea>
+      </div>
 
-      const wish = (notes[0] || "Try adding one more clear detail.").replace(/^- /, "");
+    </div>
 
-      return { stars, wish, notes };
-    }
+    <div class="actions">
+      <div>
+        <button class="btn btnPrimary" id="checkBtn">Send (Check)</button>
+        <button class="btn btnGhost" id="clearBtn">Discard</button>
+      </div>
+      <div class="pill">Feedback: 2 Stars + 1 Wish</div>
+    </div>
+  </div>
 
-    function showFeedback(text){
-      const out = document.getElementById("output");
-      out.style.display = "block";
-      out.textContent = text;
-      out.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
+  <div id="output" class="result" style="display:none;"></div>
+</div>
 
-    // Show CC / BCC rows when clicked
-    document.getElementById("ccToggle").addEventListener("click", () => {
-      document.getElementById("ccRow").style.display = "grid";
-      document.getElementById("cc").focus();
-    });
+<script>
+  function quickCheck(subject, message) {
+    const notes = [];
+    const stars = [];
+    const text = message.trim();
 
-    document.getElementById("bccToggle").addEventListener("click", () => {
-      document.getElementById("bccRow").style.display = "grid";
-      document.getElementById("bcc").focus();
-    });
+    if (subject.trim().length >= 3) stars.push("⭐ You wrote a subject.");
+    else notes.push("- Add a subject.");
 
-    // Minimise / Expand / Close (visual only)
-    const composeBody = document.getElementById("composeBody");
-    const output = document.getElementById("output");
+    if (/^(dear|hi|hello)\b/i.test(text)) stars.push("⭐ You started with a greeting.");
+    else notes.push("- Start with a greeting (Dear / Hi / Hello).");
 
-    document.getElementById("minBtn").addEventListener("click", () => {
-      // Hide the body (like minimise)
-      composeBody.style.display = (composeBody.style.display === "none") ? "block" : "none";
-    });
+    if (/i am writing to/i.test(text)) stars.push("⭐ You shared your purpose.");
+    else notes.push("- Say why you are writing.");
 
-    document.getElementById("expBtn").addEventListener("click", () => {
-      // Toggle bigger/smaller by changing max width
-      const page = document.querySelector(".page");
-      if (page.style.maxWidth === "1180px") page.style.maxWidth = "980px";
-      else page.style.maxWidth = "1180px";
-    });
+    if (text.split(/\s+/).length >= 25) stars.push("⭐ You added details.");
+    else notes.push("- Add more details.");
 
-    document.getElementById("closeBtn").addEventListener("click", () => {
-      // Close = clear everything and hide feedback
-      document.getElementById("subject").value = "";
-      document.getElementById("message").value = "";
-      document.getElementById("cc").value = "";
-      document.getElementById("bcc").value = "";
-      document.getElementById("ccRow").style.display = "none";
-      document.getElementById("bccRow").style.display = "none";
-      output.style.display = "none";
-      output.textContent = "";
-    });
+    if (/\bthank you\b|\bregards\b|\byours\b/i.test(text)) stars.push("⭐ You ended politely.");
+    else notes.push("- End politely (Thank you / Regards).");
 
-    document.getElementById("checkBtn").addEventListener("click", () => {
-      const subject = document.getElementById("subject").value;
-      const message = document.getElementById("message").value;
+    while (stars.length < 2) stars.push("⭐ Good effort!");
 
-      const { stars, wish, notes } = quickCheck({ subject, message });
+    const wish = (notes[0] || "Try adding one more detail.").replace("- ", "");
 
-      showFeedback(
-        `⭐⭐ 2 Stars\n- ${stars[0]}\n- ${stars[1]}\n\n` +
-        `🌱 1 Wish\n- ${wish}\n\n` +
-        (notes.length ? `Notes:\n${notes.join("\n")}\n\n` : "") +
-        `⚠️ Reminder: Do not type passwords, phone numbers, home addresses, or NRIC.`
-      );
-    });
+    return { stars, wish, notes };
+  }
 
-    document.getElementById("clearBtn").addEventListener("click", () => {
-      document.getElementById("subject").value = "";
-      document.getElementById("message").value = "";
-      document.getElementById("cc").value = "";
-      document.getElementById("bcc").value = "";
-      document.getElementById("ccRow").style.display = "none";
-      document.getElementById("bccRow").style.display = "none";
-      output.style.display = "none";
-      output.textContent = "";
-    });
-  </script>
+  document.getElementById("checkBtn").addEventListener("click", () => {
+    const subject = document.getElementById("subject").value;
+    const message = document.getElementById("message").value;
+
+    const { stars, wish, notes } = quickCheck(subject, message);
+    const out = document.getElementById("output");
+
+    out.style.display = "block";
+    out.textContent =
+      `⭐⭐ 2 Stars\n- ${stars[0]}\n- ${stars[1]}\n\n` +
+      `🌱 1 Wish\n- ${wish}\n\n` +
+      (notes.length ? `Notes:\n${notes.join("\n")}` : "");
+  });
+
+  document.getElementById("clearBtn").addEventListener("click", () => {
+    document.getElementById("subject").value = "";
+    document.getElementById("message").value = "";
+    document.getElementById("output").style.display = "none";
+  });
+</script>
+
 </body>
 </html>
