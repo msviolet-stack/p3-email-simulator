@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>P3 Email Practice</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; max-width: 760px; }
+    .box { border: 1px solid #ccc; border-radius: 10px; padding: 16px; }
+    label { display:block; margin-top: 10px; font-weight: 600; }
+    input, textarea, select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #bbb; }
+    textarea { min-height: 160px; }
+    button { margin-top: 14px; padding: 10px 14px; border: 0; border-radius: 10px; cursor: pointer; }
+    .hint { color:#555; font-size: 0.95em; }
+    .result { margin-top: 16px; padding: 12px; border-radius: 10px; background: #f5f5f5; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h2>P3 Email Practice (Simulator)</h2>
+  <p class="hint">This does not send a real email. It helps you practise the format.</p>
+
+  <div class="box">
+    <label>To</label>
+    <select id="to">
+      <option>teacher@school.edu (Teacher)</option>
+      <option>principal@school.edu (Principal)</option>
+      <option>friend@school.edu (Friend)</option>
+    </select>
+
+    <label>Subject</label>
+    <input id="subject" placeholder="E.g. Request to bring a book home" />
+
+    <label>Message</label>
+    <textarea id="message" placeholder="Greeting...\nPurpose...\nDetails...\nClosing...\nYour name"></textarea>
+
+    <button id="checkBtn">Check my email</button>
+    <div id="output" class="result" style="display:none;"></div>
+  </div>
+
+  <script>
+    function quickCheck({ subject, message }) {
+      const hasGreeting = /^(dear|hi|hello)\b/i.test(message.trim());
+      const hasClosing = /(from|regards|yours|thank you)\b/i.test(message);
+      const hasName = /\n\s*[A-Za-z][A-Za-z\s]{1,}\s*$/m.test(message.trim());
+
+      let score = 0;
+      const notes = [];
+
+      if (subject.trim().length >= 5) score++;
+      else notes.push("- Add a clearer subject (at least 5 words).");
+
+      if (hasGreeting) score++;
+      else notes.push("- Start with a greeting (Dear/Hi/Hello...).");
+
+      if (message.trim().length >= 40) score++;
+      else notes.push("- Add more details (what you need / when / why).");
+
+      if (hasClosing) score++;
+      else notes.push("- End with a polite closing (Thank you / From / Regards).");
+
+      if (hasName) score++;
+      else notes.push("- Add your name at the end.");
+
+      return { score, notes };
+    }
+
+    document.getElementById("checkBtn").addEventListener("click", () => {
+      const data = {
+        subject: document.getElementById("subject").value,
+        message: document.getElementById("message").value
+      };
+
+      const { score, notes } = quickCheck(data);
+
+      const out = document.getElementById("output");
+      out.style.display = "block";
+      out.textContent =
+        `Score: ${score}/5\n\n` +
+        (notes.length ? `Next steps:\n${notes.join("\n")}` : "Well done! Your email has the key parts.");
+    });
+  </script>
+</body>
+</html>
