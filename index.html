@@ -64,7 +64,7 @@
       font-size: 14px;
     }
 
-    /* Gmail-like compose card */
+    /* Compose card */
     .compose{
       background: var(--card);
       border: 1px solid var(--line);
@@ -107,7 +107,7 @@
       cursor:pointer;
     }
 
-    .rows{ padding: 6px 14px 14px; }
+    .rows{ padding: 6px 14px 0; }
     .row{
       display:grid;
       grid-template-columns: 80px 1fr;
@@ -116,15 +116,12 @@
       border-bottom: 1px solid var(--line);
       align-items:center;
     }
-    .row:last-of-type{ border-bottom:none; }
-
     .label{
       color: var(--muted);
       font-size: 14px;
       padding-top: 2px;
     }
-
-    .field, select{
+    .field{
       width: 100%;
       font-size: 16px;
       border: none;
@@ -134,26 +131,11 @@
       color: var(--text);
     }
 
-    select{
-      appearance:none;
-      -webkit-appearance:none;
-      -moz-appearance:none;
-      padding-right: 22px;
-      background-image:
-        linear-gradient(45deg, transparent 50%, var(--muted) 50%),
-        linear-gradient(135deg, var(--muted) 50%, transparent 50%);
-      background-position: calc(100% - 14px) 50%, calc(100% - 9px) 50%;
-      background-size: 5px 5px, 5px 5px;
-      background-repeat: no-repeat;
-      cursor:pointer;
-    }
-
     .toWrap{
       display:flex;
       align-items:center;
       gap:10px;
     }
-    .toWrap .leftSide{ flex: 1; }
     .toActions{
       display:flex;
       align-items:center;
@@ -173,8 +155,26 @@
       color:#2b2b2b;
     }
 
-    /* Toolbar (like your picture) */
+    /* Message editor */
+    .editor{
+      min-height: 260px;
+      padding: 12px 4px 10px;
+      outline: none;
+      border: none;
+      background: transparent;
+      line-height: 1.4;
+      font-size: 16px;
+      font-family: Arial, sans-serif;
+      white-space: pre-wrap;
+    }
+    .editor:empty:before{
+      content: "Type your email message here...";
+      color: #9aa0a6;
+    }
+
+    /* Toolbar placed ABOVE send row */
     .toolbar{
+      margin-top: 8px;
       border-top: 1px solid var(--line);
       border-bottom: 1px solid var(--line);
       background: var(--toolbar);
@@ -196,6 +196,7 @@
       color:#3c4043;
       font-size: 14px;
       user-select:none;
+      position: relative;
     }
     .toolBtn:hover{
       background:#e7eaed;
@@ -207,36 +208,34 @@
       background:#d2d6da;
       margin: 0 2px;
     }
-    .toolSelect{
-      height: 30px;
-      border-radius: 999px;
-      border: 1px solid #d2d6da;
-      background: #fff;
-      padding: 0 10px;
-      font-size: 14px;
-      color:#3c4043;
-      cursor:pointer;
-      outline:none;
-    }
 
-    /* Rich text message box */
-    .editorWrap{
-      padding: 10px 0 0;
+    /* Simple popup menu (for font/size/colour) */
+    .menu{
+      position: absolute;
+      top: 36px;
+      left: 0;
+      min-width: 170px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      padding: 6px;
+      display:none;
+      z-index: 50;
     }
-    .editor{
-      min-height: 260px;
-      padding: 12px 6px 14px;
-      outline: none;
-      border: none;
+    .menu button{
+      width: 100%;
+      text-align: left;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 0;
       background: transparent;
-      line-height: 1.4;
-      font-size: 16px;
-      font-family: Arial, sans-serif;
-      white-space: pre-wrap;
+      cursor: pointer;
+      color: var(--text);
+      font-size: 14px;
     }
-    .editor:empty:before{
-      content: "Type your email message here...";
-      color: #9aa0a6;
+    .menu button:hover{
+      background:#f3f6ff;
     }
 
     .actions{
@@ -245,7 +244,6 @@
       justify-content:space-between;
       gap:12px;
       padding: 12px 14px;
-      border-top: 1px solid var(--line);
       background: #fbfbff;
     }
     .btn{
@@ -282,6 +280,7 @@
     @media (max-width: 560px){
       .row{ grid-template-columns: 60px 1fr; }
       .label{ font-size: 13px; }
+      .menu{ left: -10px; }
     }
   </style>
 </head>
@@ -300,7 +299,7 @@
       <strong>⚠️ Safety reminder:</strong> Do not type passwords, phone numbers, home addresses, or NRIC.
     </div>
 
-    <div class="compose" aria-label="Email compose simulator">
+    <div class="compose">
       <div class="composeHeader">
         <div class="left"><span class="dot"></span>New Message</div>
         <div class="right">
@@ -310,51 +309,54 @@
         </div>
       </div>
 
-      <!-- Minimise hides/shows everything inside this -->
-      <div class="rows" id="composeBody">
+      <!-- minimise hides/shows this -->
+      <div id="composeBody">
 
-        <div class="row">
-          <div class="label" title="To: This is the person you are sending the email to.">To</div>
+        <div class="rows">
+          <div class="row">
+            <div class="label" title="To: Type the email address of the person you are writing to.">To</div>
+            <div class="toWrap">
+              <input id="toInput" class="field" placeholder="Type an email address..." />
 
-          <div class="toWrap">
-            <div class="leftSide">
-              <select id="to" class="field">
-                <option>🧑‍🏫 formteacher@school.edu (Teacher)</option>
-                <option>🏫 schooloffice@school.edu (School Office)</option>
-                <option>👨‍💼 principal@school.edu (Principal)</option>
-                <option>👫 friend@school.edu (Friend)</option>
-              </select>
-            </div>
-
-            <div class="toActions">
-              <span class="toLink" title="Cc: Other people also get the email and everyone can see their names.">Cc</span>
-              <span class="toLink" title="Bcc: Other people get the email but their names are hidden.">Bcc</span>
-              <span title="People: This shows you can add more people.">👥</span>
+              <div class="toActions">
+                <span class="toLink" title="Cc: Other people also get the email and everyone can see their names.">Cc</span>
+                <span class="toLink" title="Bcc: Other people get the email but their names are hidden.">Bcc</span>
+                <span title="People: This shows you can add more people.">👥</span>
+              </div>
             </div>
           </div>
+
+          <div class="row">
+            <div class="label" title="Subject: A short title to tell what your email is about.">Subject</div>
+            <input id="subject" class="field" />
+          </div>
+
+          <div id="message" class="editor" contenteditable="true" spellcheck="true"></div>
         </div>
 
-        <div class="row">
-          <div class="label" title="Subject: A short title to tell what your email is about.">Subject</div>
-          <input id="subject" class="field" />
-        </div>
-
-        <!-- Toolbar (matches your picture style) -->
+        <!-- TOOLBAR goes here: below message, right above Send -->
         <div class="toolbar" role="toolbar" aria-label="Formatting toolbar">
+
           <button class="toolBtn" id="undoBtn" title="Undo: Go back one step.">↶</button>
           <button class="toolBtn" id="redoBtn" title="Redo: Go forward one step.">↷</button>
 
           <span class="toolSep" aria-hidden="true"></span>
 
-          <select class="toolSelect" id="fontSelect" title="Font: Choose how the letters look.">
-            <option value="Arial" selected>Arial</option>
-            <option value="Comic Sans MS">Comic Sans</option>
-          </select>
+          <!-- Font icon + menu (only Arial / Comic Sans) -->
+          <button class="toolBtn" id="fontBtn" title="Font: Choose Arial or Comic Sans.">🅵
+            <div class="menu" id="fontMenu">
+              <button type="button" data-font="Arial">Arial</button>
+              <button type="button" data-font="Comic Sans MS">Comic Sans</button>
+            </div>
+          </button>
 
-          <select class="toolSelect" id="sizeSelect" title="Size: Choose normal or big text.">
-            <option value="normal" selected>Normal</option>
-            <option value="big">Big</option>
-          </select>
+          <!-- Size icon + menu (only Normal / Big) -->
+          <button class="toolBtn" id="sizeBtn" title="Size: Choose normal or big text.">T↕
+            <div class="menu" id="sizeMenu">
+              <button type="button" data-size="normal">Normal</button>
+              <button type="button" data-size="big">Big</button>
+            </div>
+          </button>
 
           <span class="toolSep" aria-hidden="true"></span>
 
@@ -364,10 +366,13 @@
 
           <span class="toolSep" aria-hidden="true"></span>
 
-          <select class="toolSelect" id="colorSelect" title="Colour: Choose black or red words.">
-            <option value="#000000" selected>Black</option>
-            <option value="#d93025">Red</option>
-          </select>
+          <!-- Colour icon + menu (only Black / Red) -->
+          <button class="toolBtn" id="colorBtn" title="Colour: Choose black or red words.">A▾
+            <div class="menu" id="colorMenu">
+              <button type="button" data-color="#000000">Black</button>
+              <button type="button" data-color="#d93025">Red</button>
+            </div>
+          </button>
 
           <span class="toolSep" aria-hidden="true"></span>
 
@@ -381,24 +386,14 @@
           <button class="toolBtn" id="numberBtn" title="Numbers: Make a 1,2,3 list.">1.</button>
         </div>
 
-        <!-- Rich text message editor -->
-        <div class="editorWrap">
-          <div
-            id="message"
-            class="editor"
-            contenteditable="true"
-            aria-label="Email message box"
-            spellcheck="true"></div>
+        <div class="actions">
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button class="btn btnPrimary" id="checkBtn">Send (Check)</button>
+            <button class="btn btnGhost" id="discardBtn" type="button">Discard</button>
+          </div>
+          <div class="pill">Feedback: 2 Stars + 1 Wish</div>
         </div>
 
-      </div>
-
-      <div class="actions">
-        <div style="display:flex; gap:10px; flex-wrap:wrap;">
-          <button class="btn btnPrimary" id="checkBtn">Send (Check)</button>
-          <button class="btn btnGhost" id="clearBtn" type="button">Discard</button>
-        </div>
-        <div class="pill">Feedback: 2 Stars + 1 Wish</div>
       </div>
     </div>
 
@@ -406,20 +401,18 @@
   </div>
 
   <script>
-    // --- Helpers for rich text editing ---
-    function focusEditor() {
-      const editor = document.getElementById("message");
-      editor.focus();
-    }
+    // ---- Rich text editing helpers ----
+    const editor = document.getElementById("message");
+
+    function focusEditor() { editor.focus(); }
 
     function cmd(command, value = null) {
       focusEditor();
-      // execCommand works well for a simple school simulator
       document.execCommand(command, false, value);
       focusEditor();
     }
 
-    // --- Minimise / Expand / Close (working) ---
+    // ---- Working minimise / expand / close ----
     const composeBody = document.getElementById("composeBody");
     const output = document.getElementById("output");
 
@@ -433,28 +426,23 @@
     });
 
     function clearAll() {
+      document.getElementById("toInput").value = "";
       document.getElementById("subject").value = "";
-      document.getElementById("message").innerHTML = "";
+      editor.innerHTML = "";
       output.style.display = "none";
       output.textContent = "";
       composeBody.style.display = "block";
 
-      // reset dropdowns to defaults
-      document.getElementById("fontSelect").value = "Arial";
-      document.getElementById("sizeSelect").value = "normal";
-      document.getElementById("colorSelect").value = "#000000";
-
-      // ensure editor base style resets too
-      const editor = document.getElementById("message");
+      // reset base typing style
       editor.style.fontFamily = "Arial, sans-serif";
       editor.style.fontSize = "16px";
       editor.style.color = "#000000";
     }
 
     document.getElementById("closeBtn").addEventListener("click", clearAll);
-    document.getElementById("clearBtn").addEventListener("click", clearAll);
+    document.getElementById("discardBtn").addEventListener("click", clearAll);
 
-    // --- Toolbar buttons ---
+    // ---- Toolbar buttons ----
     document.getElementById("undoBtn").addEventListener("click", () => cmd("undo"));
     document.getElementById("redoBtn").addEventListener("click", () => cmd("redo"));
 
@@ -462,52 +450,89 @@
     document.getElementById("italicBtn").addEventListener("click", () => cmd("italic"));
     document.getElementById("underlineBtn").addEventListener("click", () => cmd("underline"));
 
-    // Alignment
     document.getElementById("alignLeftBtn").addEventListener("click", () => cmd("justifyLeft"));
     document.getElementById("alignCenterBtn").addEventListener("click", () => cmd("justifyCenter"));
     document.getElementById("alignRightBtn").addEventListener("click", () => cmd("justifyRight"));
 
-    // Lists
     document.getElementById("bulletBtn").addEventListener("click", () => cmd("insertUnorderedList"));
     document.getElementById("numberBtn").addEventListener("click", () => cmd("insertOrderedList"));
 
-    // Font (only Comic Sans or Arial)
-    const editor = document.getElementById("message");
-    document.getElementById("fontSelect").addEventListener("change", (e) => {
-      const font = e.target.value;
-      // Set base typing style
-      editor.style.fontFamily = (font === "Comic Sans MS")
-        ? '"Comic Sans MS", "Comic Sans", cursive'
-        : "Arial, sans-serif";
-      // Apply to selected text too
-      cmd("fontName", font);
+    // ---- Menus (Font / Size / Colour) ----
+    function hideAllMenus() {
+      document.getElementById("fontMenu").style.display = "none";
+      document.getElementById("sizeMenu").style.display = "none";
+      document.getElementById("colorMenu").style.display = "none";
+    }
+
+    function toggleMenu(menuId) {
+      const m = document.getElementById(menuId);
+      const show = (m.style.display !== "block");
+      hideAllMenus();
+      m.style.display = show ? "block" : "none";
+    }
+
+    document.getElementById("fontBtn").addEventListener("click", (e) => {
+      e.stopPropagation();
+      toggleMenu("fontMenu");
     });
 
-    // Size (only Normal or Big)
-    document.getElementById("sizeSelect").addEventListener("change", (e) => {
-      const size = e.target.value;
-      // Set base typing style
-      editor.style.fontSize = (size === "big") ? "20px" : "16px";
-      // Apply to selected text too (fontSize uses 1-7)
-      cmd("fontSize", (size === "big") ? "5" : "3");
+    document.getElementById("sizeBtn").addEventListener("click", (e) => {
+      e.stopPropagation();
+      toggleMenu("sizeMenu");
     });
 
-    // Colour (only Black or Red)
-    document.getElementById("colorSelect").addEventListener("change", (e) => {
-      const color = e.target.value;
-      // Set base typing style
-      editor.style.color = color;
-      // Apply to selected text too
-      cmd("foreColor", color);
+    document.getElementById("colorBtn").addEventListener("click", (e) => {
+      e.stopPropagation();
+      toggleMenu("colorMenu");
     });
 
-    // --- Checker (uses plain text, ignores colours/fonts) ---
-    function quickCheck({ subject, messageText }) {
+    // Click anywhere to close menus
+    document.addEventListener("click", hideAllMenus);
+
+    // Apply font choices
+    document.querySelectorAll("#fontMenu button").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const font = btn.getAttribute("data-font");
+        editor.style.fontFamily = (font === "Comic Sans MS")
+          ? '"Comic Sans MS", "Comic Sans", cursive'
+          : "Arial, sans-serif";
+        cmd("fontName", font);
+        hideAllMenus();
+      });
+    });
+
+    // Apply size choices
+    document.querySelectorAll("#sizeMenu button").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const size = btn.getAttribute("data-size");
+        editor.style.fontSize = (size === "big") ? "20px" : "16px";
+        cmd("fontSize", (size === "big") ? "5" : "3"); // 1-7 legacy sizes
+        hideAllMenus();
+      });
+    });
+
+    // Apply colour choices
+    document.querySelectorAll("#colorMenu button").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const color = btn.getAttribute("data-color");
+        editor.style.color = color;
+        cmd("foreColor", color);
+        hideAllMenus();
+      });
+    });
+
+    // ---- Checker (now checks To has @) ----
+    function quickCheck({ toText, subject, messageText }) {
       const notes = [];
       const stars = [];
 
       const text = messageText.trim();
+      const toTrim = toText.trim();
 
+      const hasAt = toTrim.includes("@");
       const subjectOk = subject.trim().length >= 3;
       const hasGreeting = /^(dear|hi|hello)\b/i.test(text);
       const hasPurpose = /i am writing to/i.test(text);
@@ -515,10 +540,8 @@
       const hasClosing = /\bthank you\b|\bregards\b|\byours\b/i.test(text);
       const hasFrom = /\bfrom\s*,?/i.test(text);
 
-      // Gentle safety checks
-      const hasPhoneLike = /\b\d{8}\b/.test(text);
-      const hasNricLike = /\b[STFG]\d{7}[A-Z]\b/i.test(text);
-
+      // Stars
+      if (hasAt) stars.push("⭐ Your To email address has @.");
       if (subjectOk) stars.push("⭐ You wrote a subject.");
       if (hasGreeting) stars.push("⭐ You started with a greeting.");
       if (hasPurpose) stars.push("⭐ You stated your purpose.");
@@ -528,17 +551,16 @@
 
       while (stars.length < 2) stars.push("⭐ Good effort — keep improving!");
 
+      // Notes (prioritise @ mistake)
+      if (!hasAt) notes.push("❗ Your To email address is missing @. Example: name@school.edu");
       if (!subjectOk) notes.push("- Add a subject (at least 3 letters).");
       if (!hasGreeting) notes.push("- Start with a greeting (Dear / Hi / Hello).");
       if (!hasPurpose) notes.push("- State your purpose clearly (e.g. “I am writing to …”).");
       if (!enoughWords) notes.push("- Add more details (what / when / why).");
-      if (!hasClosing) notes.push("- End with a polite closing (e.g. Thank you).");
+      if (!hasClosing) notes.push("- End politely (Thank you / Regards).");
       if (!hasFrom) notes.push("- End with “From,” and your name.");
 
-      if (hasPhoneLike) notes.push("- Remove phone numbers (safety rule).");
-      if (hasNricLike) notes.push("- Remove NRIC-like information (safety rule).");
-
-      const wish = (notes[0] || "Try adding one more clear detail.").replace(/^- /, "");
+      const wish = (notes[0] || "Try adding one more clear detail.");
       return { stars, wish, notes };
     }
 
@@ -549,10 +571,11 @@
     }
 
     document.getElementById("checkBtn").addEventListener("click", () => {
+      const toText = document.getElementById("toInput").value;
       const subject = document.getElementById("subject").value;
-      const messageText = document.getElementById("message").innerText;
+      const messageText = editor.innerText;
 
-      const { stars, wish, notes } = quickCheck({ subject, messageText });
+      const { stars, wish, notes } = quickCheck({ toText, subject, messageText });
 
       showFeedback(
         `⭐⭐ 2 Stars\n- ${stars[0]}\n- ${stars[1]}\n\n` +
@@ -562,7 +585,7 @@
       );
     });
 
-    // Set default editor typing style on load
+    // Defaults
     (function initDefaults(){
       editor.style.fontFamily = "Arial, sans-serif";
       editor.style.fontSize = "16px";
