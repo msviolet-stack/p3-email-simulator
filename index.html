@@ -135,6 +135,7 @@
       display:flex;
       align-items:center;
       gap:10px;
+      min-width: 0;
     }
     .toActions{
       display:flex;
@@ -144,6 +145,7 @@
       color: var(--muted);
       white-space: nowrap;
       user-select:none;
+      flex-shrink: 0;
     }
     .toLink{
       cursor: default;
@@ -172,7 +174,7 @@
       color: #9aa0a6;
     }
 
-    /* Toolbar placed ABOVE send row */
+    /* Toolbar below editor, above send */
     .toolbar{
       margin-top: 8px;
       border-top: 1px solid var(--line);
@@ -196,7 +198,6 @@
       color:#3c4043;
       font-size: 14px;
       user-select:none;
-      position: relative;
     }
     .toolBtn:hover{
       background:#e7eaed;
@@ -209,11 +210,9 @@
       margin: 0 2px;
     }
 
-    /* Simple popup menu (for font/size/colour) */
+    /* Pop-up menus (NOT inside buttons) */
     .menu{
-      position: absolute;
-      top: 36px;
-      left: 0;
+      position: fixed;
       min-width: 170px;
       background: #fff;
       border: 1px solid var(--line);
@@ -221,7 +220,7 @@
       box-shadow: var(--shadow);
       padding: 6px;
       display:none;
-      z-index: 50;
+      z-index: 9999;
     }
     .menu button{
       width: 100%;
@@ -234,9 +233,7 @@
       color: var(--text);
       font-size: 14px;
     }
-    .menu button:hover{
-      background:#f3f6ff;
-    }
+    .menu button:hover{ background:#f3f6ff; }
 
     .actions{
       display:flex;
@@ -280,7 +277,6 @@
     @media (max-width: 560px){
       .row{ grid-template-columns: 60px 1fr; }
       .label{ font-size: 13px; }
-      .menu{ left: -10px; }
     }
   </style>
 </head>
@@ -309,15 +305,12 @@
         </div>
       </div>
 
-      <!-- minimise hides/shows this -->
       <div id="composeBody">
-
         <div class="rows">
           <div class="row">
             <div class="label" title="To: Type the email address of the person you are writing to.">To</div>
             <div class="toWrap">
               <input id="toInput" class="field" placeholder="Type an email address..." />
-
               <div class="toActions">
                 <span class="toLink" title="Cc: Other people also get the email and everyone can see their names.">Cc</span>
                 <span class="toLink" title="Bcc: Other people get the email but their names are hidden.">Bcc</span>
@@ -334,29 +327,15 @@
           <div id="message" class="editor" contenteditable="true" spellcheck="true"></div>
         </div>
 
-        <!-- TOOLBAR goes here: below message, right above Send -->
+        <!-- Toolbar BELOW message, ABOVE send -->
         <div class="toolbar" role="toolbar" aria-label="Formatting toolbar">
-
           <button class="toolBtn" id="undoBtn" title="Undo: Go back one step.">↶</button>
           <button class="toolBtn" id="redoBtn" title="Redo: Go forward one step.">↷</button>
 
           <span class="toolSep" aria-hidden="true"></span>
 
-          <!-- Font icon + menu (only Arial / Comic Sans) -->
-          <button class="toolBtn" id="fontBtn" title="Font: Choose Arial or Comic Sans.">🅵
-            <div class="menu" id="fontMenu">
-              <button type="button" data-font="Arial">Arial</button>
-              <button type="button" data-font="Comic Sans MS">Comic Sans</button>
-            </div>
-          </button>
-
-          <!-- Size icon + menu (only Normal / Big) -->
-          <button class="toolBtn" id="sizeBtn" title="Size: Choose normal or big text.">T↕
-            <div class="menu" id="sizeMenu">
-              <button type="button" data-size="normal">Normal</button>
-              <button type="button" data-size="big">Big</button>
-            </div>
-          </button>
+          <button class="toolBtn" id="fontBtn" title="Font: Choose Arial or Comic Sans.">🅵</button>
+          <button class="toolBtn" id="sizeBtn" title="Size: Choose normal or big text.">T↕</button>
 
           <span class="toolSep" aria-hidden="true"></span>
 
@@ -366,13 +345,7 @@
 
           <span class="toolSep" aria-hidden="true"></span>
 
-          <!-- Colour icon + menu (only Black / Red) -->
-          <button class="toolBtn" id="colorBtn" title="Colour: Choose black or red words.">A▾
-            <div class="menu" id="colorMenu">
-              <button type="button" data-color="#000000">Black</button>
-              <button type="button" data-color="#d93025">Red</button>
-            </div>
-          </button>
+          <button class="toolBtn" id="colorBtn" title="Colour: Choose black or red words.">A▾</button>
 
           <span class="toolSep" aria-hidden="true"></span>
 
@@ -393,26 +366,39 @@
           </div>
           <div class="pill">Feedback: 2 Stars + 1 Wish</div>
         </div>
-
       </div>
     </div>
 
     <div id="output" class="result" style="display:none;"></div>
   </div>
 
+  <!-- Pop-up menus (outside buttons) -->
+  <div class="menu" id="fontMenu" aria-label="Font menu">
+    <button type="button" data-font="Arial">Arial</button>
+    <button type="button" data-font="Comic Sans MS">Comic Sans</button>
+  </div>
+
+  <div class="menu" id="sizeMenu" aria-label="Size menu">
+    <button type="button" data-size="normal">Normal</button>
+    <button type="button" data-size="big">Big</button>
+  </div>
+
+  <div class="menu" id="colorMenu" aria-label="Colour menu">
+    <button type="button" data-color="#000000">Black</button>
+    <button type="button" data-color="#d93025">Red</button>
+  </div>
+
   <script>
-    // ---- Rich text editing helpers ----
+    // --- Editor helpers ---
     const editor = document.getElementById("message");
-
-    function focusEditor() { editor.focus(); }
-
-    function cmd(command, value = null) {
+    function focusEditor(){ editor.focus(); }
+    function cmd(command, value=null){
       focusEditor();
       document.execCommand(command, false, value);
       focusEditor();
     }
 
-    // ---- Working minimise / expand / close ----
+    // --- Minimise / Expand / Close ---
     const composeBody = document.getElementById("composeBody");
     const output = document.getElementById("output");
 
@@ -425,72 +411,64 @@
       page.style.maxWidth = (page.style.maxWidth === "1180px") ? "980px" : "1180px";
     });
 
-    function clearAll() {
+    function clearAll(){
       document.getElementById("toInput").value = "";
       document.getElementById("subject").value = "";
       editor.innerHTML = "";
       output.style.display = "none";
       output.textContent = "";
       composeBody.style.display = "block";
-
       // reset base typing style
       editor.style.fontFamily = "Arial, sans-serif";
       editor.style.fontSize = "16px";
       editor.style.color = "#000000";
     }
-
     document.getElementById("closeBtn").addEventListener("click", clearAll);
     document.getElementById("discardBtn").addEventListener("click", clearAll);
 
-    // ---- Toolbar buttons ----
+    // --- Toolbar buttons ---
     document.getElementById("undoBtn").addEventListener("click", () => cmd("undo"));
     document.getElementById("redoBtn").addEventListener("click", () => cmd("redo"));
-
     document.getElementById("boldBtn").addEventListener("click", () => cmd("bold"));
     document.getElementById("italicBtn").addEventListener("click", () => cmd("italic"));
     document.getElementById("underlineBtn").addEventListener("click", () => cmd("underline"));
-
     document.getElementById("alignLeftBtn").addEventListener("click", () => cmd("justifyLeft"));
     document.getElementById("alignCenterBtn").addEventListener("click", () => cmd("justifyCenter"));
     document.getElementById("alignRightBtn").addEventListener("click", () => cmd("justifyRight"));
-
     document.getElementById("bulletBtn").addEventListener("click", () => cmd("insertUnorderedList"));
     document.getElementById("numberBtn").addEventListener("click", () => cmd("insertOrderedList"));
 
-    // ---- Menus (Font / Size / Colour) ----
-    function hideAllMenus() {
-      document.getElementById("fontMenu").style.display = "none";
-      document.getElementById("sizeMenu").style.display = "none";
-      document.getElementById("colorMenu").style.display = "none";
+    // --- Menus (Font / Size / Colour) ---
+    const fontBtn = document.getElementById("fontBtn");
+    const sizeBtn = document.getElementById("sizeBtn");
+    const colorBtn = document.getElementById("colorBtn");
+    const fontMenu = document.getElementById("fontMenu");
+    const sizeMenu = document.getElementById("sizeMenu");
+    const colorMenu = document.getElementById("colorMenu");
+
+    function hideMenus(){
+      fontMenu.style.display = "none";
+      sizeMenu.style.display = "none";
+      colorMenu.style.display = "none";
     }
 
-    function toggleMenu(menuId) {
-      const m = document.getElementById(menuId);
-      const show = (m.style.display !== "block");
-      hideAllMenus();
-      m.style.display = show ? "block" : "none";
+    function openMenu(menuEl, anchorEl){
+      const r = anchorEl.getBoundingClientRect();
+      hideMenus();
+      menuEl.style.left = Math.round(r.left) + "px";
+      menuEl.style.top  = Math.round(r.bottom + 6) + "px";
+      menuEl.style.display = "block";
     }
 
-    document.getElementById("fontBtn").addEventListener("click", (e) => {
-      e.stopPropagation();
-      toggleMenu("fontMenu");
-    });
+    fontBtn.addEventListener("click", (e) => { e.stopPropagation(); openMenu(fontMenu, fontBtn); });
+    sizeBtn.addEventListener("click", (e) => { e.stopPropagation(); openMenu(sizeMenu, sizeBtn); });
+    colorBtn.addEventListener("click", (e) => { e.stopPropagation(); openMenu(colorMenu, colorBtn); });
 
-    document.getElementById("sizeBtn").addEventListener("click", (e) => {
-      e.stopPropagation();
-      toggleMenu("sizeMenu");
-    });
+    // close menus when clicking elsewhere
+    document.addEventListener("click", hideMenus);
 
-    document.getElementById("colorBtn").addEventListener("click", (e) => {
-      e.stopPropagation();
-      toggleMenu("colorMenu");
-    });
-
-    // Click anywhere to close menus
-    document.addEventListener("click", hideAllMenus);
-
-    // Apply font choices
-    document.querySelectorAll("#fontMenu button").forEach(btn => {
+    // apply font (only Arial / Comic Sans)
+    fontMenu.querySelectorAll("button").forEach(btn => {
       btn.addEventListener("click", (e) => {
         e.stopPropagation();
         const font = btn.getAttribute("data-font");
@@ -498,33 +476,33 @@
           ? '"Comic Sans MS", "Comic Sans", cursive'
           : "Arial, sans-serif";
         cmd("fontName", font);
-        hideAllMenus();
+        hideMenus();
       });
     });
 
-    // Apply size choices
-    document.querySelectorAll("#sizeMenu button").forEach(btn => {
+    // apply size (only Normal / Big)
+    sizeMenu.querySelectorAll("button").forEach(btn => {
       btn.addEventListener("click", (e) => {
         e.stopPropagation();
         const size = btn.getAttribute("data-size");
         editor.style.fontSize = (size === "big") ? "20px" : "16px";
-        cmd("fontSize", (size === "big") ? "5" : "3"); // 1-7 legacy sizes
-        hideAllMenus();
+        cmd("fontSize", (size === "big") ? "5" : "3");
+        hideMenus();
       });
     });
 
-    // Apply colour choices
-    document.querySelectorAll("#colorMenu button").forEach(btn => {
+    // apply colour (only Black / Red)
+    colorMenu.querySelectorAll("button").forEach(btn => {
       btn.addEventListener("click", (e) => {
         e.stopPropagation();
         const color = btn.getAttribute("data-color");
         editor.style.color = color;
         cmd("foreColor", color);
-        hideAllMenus();
+        hideMenus();
       });
     });
 
-    // ---- Checker (now checks To has @) ----
+    // --- Checker (includes @ check for To) ---
     function quickCheck({ toText, subject, messageText }) {
       const notes = [];
       const stars = [];
@@ -551,7 +529,7 @@
 
       while (stars.length < 2) stars.push("⭐ Good effort — keep improving!");
 
-      // Notes (prioritise @ mistake)
+      // Notes (prioritise missing @)
       if (!hasAt) notes.push("❗ Your To email address is missing @. Example: name@school.edu");
       if (!subjectOk) notes.push("- Add a subject (at least 3 letters).");
       if (!hasGreeting) notes.push("- Start with a greeting (Dear / Hi / Hello).");
@@ -585,7 +563,7 @@
       );
     });
 
-    // Defaults
+    // defaults
     (function initDefaults(){
       editor.style.fontFamily = "Arial, sans-serif";
       editor.style.fontSize = "16px";
