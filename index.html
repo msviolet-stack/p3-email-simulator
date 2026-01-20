@@ -3,80 +3,170 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>P3 Email Practice</title>
+  <title>P3 Email Writing Practice</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; max-width: 760px; }
-    .box { border: 1px solid #ccc; border-radius: 10px; padding: 16px; }
-    label { display:block; margin-top: 10px; font-weight: 600; }
-    input, textarea, select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #bbb; }
-    textarea { min-height: 160px; }
-    button { margin-top: 14px; padding: 10px 14px; border: 0; border-radius: 10px; cursor: pointer; }
-    .hint { color:#555; font-size: 0.95em; }
-    .result { margin-top: 16px; padding: 12px; border-radius: 10px; background: #f5f5f5; white-space: pre-wrap; }
+    body { font-family: Arial, sans-serif; margin: 20px; max-width: 820px; }
+    .box { border: 1px solid #ccc; border-radius: 14px; padding: 16px; }
+    label { display:block; margin-top: 10px; font-weight: 700; }
+    input, textarea, select { width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #bbb; font-size: 16px; }
+    textarea { min-height: 220px; line-height: 1.35; }
+    button { margin-top: 14px; padding: 10px 14px; border: 0; border-radius: 12px; cursor: pointer; font-size: 16px; }
+    .hint { color:#444; font-size: 0.98em; }
+    .warn { margin-top: 10px; padding: 10px 12px; border-radius: 12px; background: #fff6d6; border: 1px solid #f0d27a; }
+    .result { margin-top: 16px; padding: 14px; border-radius: 12px; background: #f5f5f5; white-space: pre-wrap; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 680px) { .row { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
-  <h2>P3 Email Practice (Simulator)</h2>
-  <p class="hint">This does not send a real email. It helps you practise the format.</p>
+  <h2>P3 Email Writing Practice (Simulator)</h2>
+  <p class="hint">
+    This is a practice email. It does not send a real email.
+  </p>
+  <div class="warn">
+    <strong>Safety reminder:</strong> Do not type passwords, phone numbers, home addresses, or NRIC.
+    Use initials only for your name.
+  </div>
 
   <div class="box">
+    <div class="row">
+      <div>
+        <label>My name (use initials only)</label>
+        <input id="studentName" placeholder="E.g. VS" />
+      </div>
+      <div>
+        <label>My class</label>
+        <input id="studentClass" placeholder="E.g. 3A" />
+      </div>
+    </div>
+
     <label>To</label>
     <select id="to">
-      <option>teacher@school.edu (Teacher)</option>
+      <option>formteacher@school.edu (Teacher)</option>
+      <option>schooloffice@school.edu (School Office)</option>
       <option>principal@school.edu (Principal)</option>
       <option>friend@school.edu (Friend)</option>
     </select>
 
     <label>Subject</label>
-    <input id="subject" placeholder="E.g. Request to bring a book home" />
+    <input id="subject" placeholder="E.g. Request to bring a library book home" />
 
     <label>Message</label>
-    <textarea id="message" placeholder="Greeting...\nPurpose...\nDetails...\nClosing...\nYour name"></textarea>
+    <textarea id="message">Dear _____,
+
+I am writing to ____________________________.
+
+Details:
+1) _________________________________________
+2) _________________________________________
+
+Thank you.
+
+From,
+________</textarea>
 
     <button id="checkBtn">Check my email</button>
+    <button id="resetBtn" type="button">Reset template</button>
+
     <div id="output" class="result" style="display:none;"></div>
   </div>
 
   <script>
-    function quickCheck({ subject, message }) {
-      const hasGreeting = /^(dear|hi|hello)\b/i.test(message.trim());
-      const hasClosing = /(from|regards|yours|thank you)\b/i.test(message);
-      const hasName = /\n\s*[A-Za-z][A-Za-z\s]{1,}\s*$/m.test(message.trim());
+    const TEMPLATE =
+`Dear _____,
 
-      let score = 0;
+I am writing to ____________________________.
+
+Details:
+1) _________________________________________
+2) _________________________________________
+
+Thank you.
+
+From,
+________`;
+
+    function quickCheck({ subject, message, studentName, studentClass }) {
       const notes = [];
 
-      if (subject.trim().length >= 5) score++;
-      else notes.push("- Add a clearer subject (at least 5 words).");
+      // Basic checks (P3-friendly)
+      const subjectOk = subject.trim().length >= 3;
 
-      if (hasGreeting) score++;
-      else notes.push("- Start with a greeting (Dear/Hi/Hello...).");
+      const msgTrim = message.trim();
+      const hasGreeting = /^(dear|hi|hello)\b/i.test(msgTrim);
 
-      if (message.trim().length >= 40) score++;
-      else notes.push("- Add more details (what you need / when / why).");
+      const hasPurpose = /i am writing to/i.test(message);
 
-      if (hasClosing) score++;
-      else notes.push("- End with a polite closing (Thank you / From / Regards).");
+      const hasDetailsLine = /details\s*:/i.test(message) || /\b1\)\b/.test(message);
+      const enoughWords = msgTrim.split(/\s+/).filter(Boolean).length >= 25;
 
-      if (hasName) score++;
-      else notes.push("- Add your name at the end.");
+      const hasClosing = /\bthank you\b/i.test(message) || /\bregards\b/i.test(message) || /\byours\b/i.test(message);
 
-      return { score, notes };
+      const hasFrom = /\bfrom\s*,?/i.test(message);
+      const hasNameAtEnd = /from\s*,?\s*\n\s*[A-Za-z]/i.test(message) || /\n\s*[A-Za-z]{1,}\s*$/m.test(msgTrim);
+
+      // Safety checks (gentle reminders, not punitive)
+      const hasPhoneLike = /\b\d{8}\b/.test(message); // SG 8-digit pattern (rough)
+      const hasNricLike = /\b[STFG]\d{7}[A-Z]\b/i.test(message);
+
+      // Name/class (optional; encourage)
+      if (!studentName.trim()) notes.push("- Add your initials in the Name box (e.g. VS).");
+      if (!studentClass.trim()) notes.push("- Add your class (e.g. 3A).");
+
+      if (!subjectOk) notes.push("- Add a subject (at least 3 letters).");
+      if (!hasGreeting) notes.push("- Start with a greeting (Dear/Hi/Hello…).");
+      if (!hasPurpose) notes.push("- Write your purpose: “I am writing to …”");
+      if (!hasDetailsLine || !enoughWords) notes.push("- Add 1–2 clear details (what / when / why).");
+      if (!hasClosing) notes.push("- Add a polite closing (e.g. Thank you).");
+      if (!hasFrom || !hasNameAtEnd) notes.push("- End with “From,” and your name.");
+
+      if (hasPhoneLike) notes.push("- Remove phone numbers (safety rule).");
+      if (hasNricLike) notes.push("- Remove NRIC-like information (safety rule).");
+
+      // Stars (pick positives)
+      const stars = [];
+      if (subjectOk) stars.push("⭐ You included a subject.");
+      if (hasGreeting) stars.push("⭐ You started with a greeting.");
+      if (hasPurpose) stars.push("⭐ You stated your purpose.");
+      if (hasDetailsLine && enoughWords) stars.push("⭐ You added helpful details.");
+      if (hasClosing) stars.push("⭐ You ended politely.");
+      if (hasFrom && hasNameAtEnd) stars.push("⭐ You signed off with your name.");
+
+      // Ensure we always have at least 2 stars
+      while (stars.length < 2) stars.push("⭐ Good effort — keep going!");
+
+      // Wish: first improvement that is not safety-related if possible
+      const wish =
+        (notes.find(n => !/safety rule/i.test(n)) || notes[0] || "- Try adding 1 more detail (when / where / what you need).")
+          .replace(/^- /, "");
+
+      return { stars, wish, notes };
     }
 
     document.getElementById("checkBtn").addEventListener("click", () => {
       const data = {
+        to: document.getElementById("to").value,
         subject: document.getElementById("subject").value,
-        message: document.getElementById("message").value
+        message: document.getElementById("message").value,
+        studentName: document.getElementById("studentName").value,
+        studentClass: document.getElementById("studentClass").value
       };
 
-      const { score, notes } = quickCheck(data);
+      const { stars, wish, notes } = quickCheck(data);
 
       const out = document.getElementById("output");
       out.style.display = "block";
       out.textContent =
-        `Score: ${score}/5\n\n` +
-        (notes.length ? `Next steps:\n${notes.join("\n")}` : "Well done! Your email has the key parts.");
+        `2 Stars ⭐⭐\n- ${stars[0]}\n- ${stars[1]}\n\n` +
+        `1 Wish 🌱\n- ${wish}\n\n` +
+        (notes.length ? `Teacher notes (optional):\n${notes.join("\n")}\n\n` : "") +
+        `Reminder: Do not type passwords, phone numbers, home addresses, or NRIC.`;
+    });
+
+    document.getElementById("resetBtn").addEventListener("click", () => {
+      document.getElementById("message").value = TEMPLATE;
+      document.getElementById("output").style.display = "none";
+      document.getElementById("output").textContent = "";
     });
   </script>
 </body>
