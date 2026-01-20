@@ -3,74 +3,254 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>P3 Email Writing Practice</title>
+  <title>P3 Email Simulator</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; max-width: 820px; }
-    .box { border: 1px solid #ccc; border-radius: 14px; padding: 16px; }
-    label { display:block; margin-top: 10px; font-weight: 700; }
-    input, textarea, select {
-      width: 100%;
-      padding: 10px;
-      border-radius: 10px;
-      border: 1px solid #bbb;
-      font-size: 16px;
+    :root{
+      --bg:#f6f8fc;
+      --card:#ffffff;
+      --line:#e0e3eb;
+      --text:#1f1f1f;
+      --muted:#5f6368;
+      --accent:#1a73e8;
+      --warnbg:#fff6d6;
+      --warnline:#f0d27a;
+      --shadow: 0 1px 2px rgba(0,0,0,.06), 0 6px 24px rgba(0,0,0,.08);
+      --radius: 16px;
     }
-    textarea { min-height: 220px; line-height: 1.35; }
-    button {
-      margin-top: 14px;
-      padding: 10px 14px;
-      border: 0;
-      border-radius: 12px;
-      cursor: pointer;
-      font-size: 16px;
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
     }
-    .hint { color:#444; font-size: 0.98em; }
-    .warn {
-      margin-top: 10px;
+    .page{
+      max-width: 980px;
+      margin: 18px auto;
+      padding: 0 14px;
+    }
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom: 12px;
+    }
+    .title{
+      font-size: 18px;
+      font-weight: 800;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .pill{
+      font-size: 12px;
+      color: var(--muted);
+      background: #eef3fd;
+      border: 1px solid #d7e3fd;
+      border-radius: 999px;
+      padding: 6px 10px;
+      line-height: 1;
+    }
+    .warn{
+      margin: 10px 0 14px;
       padding: 10px 12px;
       border-radius: 12px;
-      background: #fff6d6;
-      border: 1px solid #f0d27a;
+      background: var(--warnbg);
+      border: 1px solid var(--warnline);
+      color:#5a4a12;
+      font-size: 14px;
     }
-    .result {
-      margin-top: 16px;
+
+    /* Gmail-like compose card */
+    .compose{
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .composeHeader{
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      background: #fbfbff;
+    }
+    .composeHeader .left{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-weight: 800;
+    }
+    .dot{
+      width:10px; height:10px; border-radius:50%;
+      background: #34a853;
+      border: 1px solid #2c8f46;
+    }
+    .composeHeader .right{
+      display:flex; gap:10px; color: var(--muted); font-size: 14px;
+      user-select:none;
+    }
+    .icon{
+      width: 28px; height: 28px;
+      border-radius: 999px;
+      display:grid; place-items:center;
+      border: 1px solid transparent;
+    }
+    .icon:hover{
+      border-color: var(--line);
+      background: #f3f6ff;
+      cursor:pointer;
+    }
+
+    .rows{ padding: 6px 14px 14px; }
+    .row{
+      display:grid;
+      grid-template-columns: 80px 1fr;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .row:last-of-type{ border-bottom:none; }
+    .label{
+      color: var(--muted);
+      font-size: 14px;
+      padding-top: 8px;
+    }
+    .field, select, textarea{
+      width: 100%;
+      font-size: 16px;
+      border: none;
+      outline: none;
+      background: transparent;
+      padding: 6px 4px;
+      color: var(--text);
+    }
+    select{
+      appearance:none;
+      -webkit-appearance:none;
+      -moz-appearance:none;
+      padding-right: 22px;
+      background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+                        linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+      background-position: calc(100% - 14px) 50%, calc(100% - 9px) 50%;
+      background-size: 5px 5px, 5px 5px;
+      background-repeat: no-repeat;
+      cursor:pointer;
+    }
+    textarea{
+      min-height: 260px;
+      resize: vertical;
+      line-height: 1.4;
+      border-top: 1px solid var(--line);
+      padding: 14px 4px 8px;
+    }
+
+    .actions{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding: 12px 14px;
+      border-top: 1px solid var(--line);
+      background: #fbfbff;
+    }
+    .btn{
+      border: 0;
+      border-radius: 999px;
+      padding: 10px 16px;
+      font-size: 15px;
+      cursor:pointer;
+    }
+    .btnPrimary{
+      background: var(--accent);
+      color: white;
+      font-weight: 700;
+    }
+    .btnPrimary:hover{ filter: brightness(0.95); }
+    .btnGhost{
+      background: transparent;
+      border: 1px solid var(--line);
+      color: var(--text);
+    }
+    .btnGhost:hover{ background:#f3f6ff; }
+
+    .result{
+      margin-top: 14px;
       padding: 14px;
-      border-radius: 12px;
-      background: #f5f5f5;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: #ffffff;
+      box-shadow: 0 1px 2px rgba(0,0,0,.04);
       white-space: pre-wrap;
+      font-size: 15px;
+    }
+
+    @media (max-width: 560px){
+      .row{ grid-template-columns: 60px 1fr; }
+      .label{ font-size: 13px; }
     }
   </style>
 </head>
+
 <body>
+  <div class="page">
+    <div class="topbar">
+      <div class="title">✉️ P3 Email Simulator <span class="pill">Practice only • Not a real email</span></div>
+      <div class="pill">No sign-in needed</div>
+    </div>
 
-  <h2>✉️ P3 Email Writing Practice</h2>
+    <div class="warn">
+      <strong>⚠️ Safety reminder:</strong> Never send your passwords, phone number, home address, or NRIC in an email. <br>
+If you’re unsure, ask a teacher or parent first.
+    </div>
 
-  <p class="hint">
-    This is a practice email. It does not send a real email.
-  </p>
+    <div class="compose" aria-label="Email compose simulator">
+      <div class="composeHeader">
+        <div class="left"><span class="dot"></span>New Message</div>
+        <div class="right">
+          <span class="icon" title="Minimize">—</span>
+          <span class="icon" title="Expand">▢</span>
+          <span class="icon" title="Close">✕</span>
+        </div>
+      </div>
 
-  <div class="warn">
-    <strong>⚠️ Safety reminder:</strong>
-    Do not type passwords, phone numbers, home addresses, or NRIC.
-  </div>
+      <div class="rows">
+        <div class="row">
+          <div class="label">From</div>
+          <input class="field" id="from" value="student@school.edu" readonly />
+        </div>
 
-  <div class="box">
+        <div class="row">
+          <div class="label">To</div>
+          <select id="to">
+            <option>🧑‍🏫 formteacher@school.edu (Teacher)</option>
+            <option>🏫 schooloffice@school.edu (School Office)</option>
+            <option>👨‍💼 principal@school.edu (Principal)</option>
+            <option>👫 friend@school.edu (Friend)</option>
+          </select>
+        </div>
 
-    <label>To</label>
-    <select id="to">
-      <option>🧑‍🏫 formteacher@school.edu (Teacher)</option>
-      <option>🏫 schooloffice@school.edu (School Office)</option>
-      <option>👨‍💼 principal@school.edu (Principal)</option>
-      <option>👫 friend@school.edu (Friend)</option>
-    </select>
+        <div class="row">
+          <div class="label">Subject</div>
+          <input class="field" id="subject" />
+        </div>
 
-    <label>Subject</label>
-    <input id="subject" />
+        <div>
+          <textarea id="message" placeholder=""></textarea>
+        </div>
+      </div>
 
-    <label>Message</label>
-    <textarea id="message"></textarea>
-
-    <button id="checkBtn">Check my email</button>
+      <div class="actions">
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button class="btn btnPrimary" id="checkBtn">Send (Check)</button>
+          <button class="btn btnGhost" id="clearBtn" type="button">Discard</button>
+        </div>
+        <div class="pill">Feedback: 2 Stars + 1 Wish</div>
+      </div>
+    </div>
 
     <div id="output" class="result" style="display:none;"></div>
   </div>
@@ -101,9 +281,7 @@
       if (hasClosing) stars.push("⭐ You ended politely.");
       if (hasFrom) stars.push("⭐ You signed off your email.");
 
-      while (stars.length < 2) {
-        stars.push("⭐ Good effort — keep improving!");
-      }
+      while (stars.length < 2) stars.push("⭐ Good effort — keep improving!");
 
       // Improvement notes
       if (!subjectOk) notes.push("- Add a subject (at least 3 letters).");
@@ -116,30 +294,39 @@
       if (hasPhoneLike) notes.push("- Remove phone numbers (safety rule).");
       if (hasNricLike) notes.push("- Remove NRIC-like information (safety rule).");
 
-      const wish =
-        (notes[0] || "Try adding one more clear detail.")
-          .replace(/^- /, "");
+      const wish = (notes[0] || "Try adding one more clear detail.").replace(/^- /, "");
 
       return { stars, wish, notes };
     }
 
-    document.getElementById("checkBtn").addEventListener("click", () => {
-      const data = {
-        subject: document.getElementById("subject").value,
-        message: document.getElementById("message").value
-      };
-
-      const { stars, wish, notes } = quickCheck(data);
-
+    function showFeedback(text){
       const out = document.getElementById("output");
       out.style.display = "block";
-      out.textContent =
+      out.textContent = text;
+      out.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    document.getElementById("checkBtn").addEventListener("click", () => {
+      const subject = document.getElementById("subject").value;
+      const message = document.getElementById("message").value;
+
+      const { stars, wish, notes } = quickCheck({ subject, message });
+
+      showFeedback(
         `⭐⭐ 2 Stars\n- ${stars[0]}\n- ${stars[1]}\n\n` +
         `🌱 1 Wish\n- ${wish}\n\n` +
         (notes.length ? `Notes:\n${notes.join("\n")}\n\n` : "") +
-        `⚠️ Reminder: Do not type passwords, phone numbers, home addresses, or NRIC.`;
+        `⚠️ Reminder: Do not type passwords, phone numbers, home addresses, or NRIC.`
+      );
+    });
+
+    document.getElementById("clearBtn").addEventListener("click", () => {
+      document.getElementById("subject").value = "";
+      document.getElementById("message").value = "";
+      const out = document.getElementById("output");
+      out.style.display = "none";
+      out.textContent = "";
     });
   </script>
-
 </body>
 </html>
