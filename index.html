@@ -317,7 +317,6 @@
           <div class="row">
             <div class="label" title="To: Type the email address of the person you are writing to.">To</div>
             <div class="toWrap">
-              <!-- no suggested email address -->
               <input id="toInput" class="field" />
               <div class="toActions">
                 <span class="toLink" title="Cc: Other people also get the email and everyone can see their names.">Cc</span>
@@ -329,14 +328,12 @@
 
           <div class="row">
             <div class="label" title="Subject: A short title to tell what your email is about.">Subject</div>
-            <!-- no suggested subject -->
             <input id="subject" class="field" />
           </div>
 
           <div id="message" class="editor" contenteditable="true" spellcheck="true"></div>
         </div>
 
-        <!-- Toolbar BELOW message, ABOVE send -->
         <div class="toolbar" role="toolbar" aria-label="Formatting toolbar">
           <button class="toolBtn" id="undoBtn" title="Undo: Go back one step.">↶</button>
           <button class="toolBtn" id="redoBtn" title="Redo: Go forward one step.">↷</button>
@@ -373,7 +370,8 @@
             <button class="btn btnPrimary" id="checkBtn">Send (Check)</button>
             <button class="btn btnGhost" id="discardBtn" type="button">Discard</button>
           </div>
-          <div class="pill">Feedback</div>
+          <!-- removed the Feedback pill inside the email -->
+          <div></div>
         </div>
       </div>
     </div>
@@ -385,7 +383,6 @@
     </div>
   </div>
 
-  <!-- Pop-up menus -->
   <div class="menu" id="fontMenu" aria-label="Font menu">
     <button type="button" data-font="Arial">Arial</button>
     <button type="button" data-font="Comic Sans MS">Comic Sans</button>
@@ -478,7 +475,6 @@
 
     document.addEventListener("click", hideMenus);
 
-    // apply font (only Arial / Comic Sans)
     fontMenu.querySelectorAll("button").forEach(btn => {
       btn.addEventListener("click", (e) => {
         e.stopPropagation();
@@ -491,7 +487,6 @@
       });
     });
 
-    // apply size (only Normal / Big)
     sizeMenu.querySelectorAll("button").forEach(btn => {
       btn.addEventListener("click", (e) => {
         e.stopPropagation();
@@ -502,7 +497,6 @@
       });
     });
 
-    // apply colour (only Black / Red)
     colorMenu.querySelectorAll("button").forEach(btn => {
       btn.addEventListener("click", (e) => {
         e.stopPropagation();
@@ -513,7 +507,13 @@
       });
     });
 
-    // --- Feedback (NO "2 Stars + 1 Wish") ---
+    // --- Helpers for feedback rules ---
+    function firstNonEmptyLine(text){
+      const lines = (text || "").split(/\r?\n/).map(l => l.trim());
+      return lines.find(l => l.length > 0) || "";
+    }
+
+    // --- Feedback (⭐ good / 🌱 improve) ---
     function buildFeedback({ toText, subject, messageText }) {
       const good = [];
       const improve = [];
@@ -530,27 +530,38 @@
       if (subjTrim.length > 0) good.push("⭐ You wrote a subject.");
       else improve.push("🌱 Add a subject to tell what your email is about.");
 
-      // Salutation
-      if (/^(dear|hi|hello)\s+[a-z]/i.test(msgTrim)) {
+      // Salutation rule: MUST start with Dear ...,
+      const firstLine = firstNonEmptyLine(msgTrim);
+      const startsDear = /^dear\s+/i.test(firstLine);
+      const hasComma = /,$/.test(firstLine);
+
+      if (startsDear && hasComma) {
         good.push("⭐ You used the correct salutation (e.g. Dear Mrs Wong,).");
+      } else if (startsDear && !hasComma) {
+        improve.push("🌱 Add a comma after the salutation. Example: Dear Mrs Wong,");
       } else {
-        improve.push("🌱 Start your email with a salutation (e.g. Dear Mrs Wong,).");
+        improve.push("🌱 Start with Dear ... ,  Example: Dear Mrs Wong,");
       }
 
-      // Details (simple)
-      if (msgTrim.length >= 20) good.push("⭐ You wrote some details in your message.");
-      else improve.push("🌱 Add more details to your message.");
+      // Details (simple check)
+      if (msgTrim.length >= 30) good.push("⭐ You wrote some details in your message.");
+      else improve.push("🌱 Add more details (what happened / what you need / when).");
 
-      // Sign-off
-      if (/\bthank you\b|\bfrom\b|\bregards\b/i.test(msgTrim)) {
-        good.push("⭐ You signed off your email correctly.");
+      // Sign-off rule: encourage Regards / Yours sincerely
+      const hasPreferredSignOff = /\bregards\b|\byours sincerely\b/i.test(msgTrim);
+      const hasAnyPoliteEnd = /\bthank you\b|\byours faithfully\b|\bfrom\b|\bbest wishes\b/i.test(msgTrim);
+
+      if (hasPreferredSignOff) {
+        good.push("⭐ You signed off politely (Regards / Yours sincerely).");
+      } else if (hasAnyPoliteEnd) {
+        improve.push("🌱 Try signing off with “Regards,” or “Yours sincerely,” then write your name.");
       } else {
-        improve.push("🌱 End your email politely (e.g. Thank you. From, your name).");
+        improve.push("🌱 Add a sign-off: “Regards,” or “Yours sincerely,” then your name.");
       }
 
-      // Keep it short for P3: show up to 3 good points, and 1 growth point
+      // Keep it manageable: up to 3 ⭐ and up to 2 🌱
       const goodToShow = good.slice(0, 3);
-      const improveToShow = improve[0];
+      const improveToShow = improve.slice(0, 2);
 
       let text = "Feedback\n\n";
       if (goodToShow.length) {
@@ -558,8 +569,9 @@
         text += "\n";
       }
 
-      if (improveToShow) {
-        text += improveToShow + "\n\n";
+      if (improveToShow.length) {
+        improveToShow.forEach(line => text += line + "\n");
+        text += "\n";
       } else {
         text += "⭐ Well done! Read your email once more to check spelling and punctuation.\n\n";
       }
@@ -582,7 +594,6 @@
       showFeedback(buildFeedback({ toText, subject, messageText }));
     });
 
-    // defaults
     (function initDefaults(){
       editor.style.fontFamily = "Arial, sans-serif";
       editor.style.fontSize = "16px";
