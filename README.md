@@ -25,5 +25,5 @@ Hosted on **GitHub Pages**
 
 ## Credits
 
-Created by **Violet Soh**  
+Created by **Ms Violet Soh**  
 Supported by **OpenAI technology**
