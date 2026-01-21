@@ -52,6 +52,7 @@
       border: 1px solid #d7e3fd;
       border-radius: 999px;
       padding: 6px 10px;
+      line-height: 1;
     }
     .warn{
       margin: 10px 0 14px;
@@ -59,9 +60,11 @@
       border-radius: 12px;
       background: var(--warnbg);
       border: 1px solid var(--warnline);
+      color:#5a4a12;
       font-size: 14px;
     }
 
+    /* Compose card */
     .compose{
       background: var(--card);
       border: 1px solid var(--line);
@@ -73,191 +76,518 @@
       padding: 12px 14px;
       border-bottom: 1px solid var(--line);
       display:flex;
+      align-items:center;
       justify-content:space-between;
       background: #fbfbff;
     }
+    .composeHeader .left{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-weight: 800;
+    }
+    .dot{
+      width:10px; height:10px; border-radius:50%;
+      background: #34a853;
+      border: 1px solid #2c8f46;
+    }
+    .composeHeader .right{
+      display:flex; gap:10px; color: var(--muted); font-size: 14px;
+      user-select:none;
+    }
     .icon{
-      width:28px;height:28px;border-radius:50%;
-      display:grid;place-items:center;
+      width: 28px; height: 28px;
+      border-radius: 999px;
+      display:grid; place-items:center;
+      border: 1px solid transparent;
+    }
+    .icon:hover{
+      border-color: var(--line);
+      background: #f3f6ff;
       cursor:pointer;
     }
-    .icon:hover{background:#f3f6ff;}
 
+    .rows{ padding: 6px 14px 0; }
     .row{
       display:grid;
-      grid-template-columns:80px 1fr;
-      gap:10px;
-      padding:8px 14px;
-      border-bottom:1px solid var(--line);
+      grid-template-columns: 80px 1fr;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--line);
+      align-items:center;
     }
-    .label{font-size:14px;color:var(--muted);}
+    .label{
+      color: var(--muted);
+      font-size: 14px;
+      padding-top: 2px;
+    }
     .field{
-      border:none;
-      font-size:16px;
-      outline:none;
-      background:transparent;
+      width: 100%;
+      font-size: 16px;
+      border: none;
+      outline: none;
+      background: transparent;
+      padding: 6px 4px;
+      color: var(--text);
     }
 
+    .toWrap{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width: 0;
+    }
+    .toActions{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-size:14px;
+      color: var(--muted);
+      white-space: nowrap;
+      user-select:none;
+      flex-shrink: 0;
+    }
+    .toLink{
+      cursor: default;
+      padding: 4px 6px;
+      border-radius: 8px;
+    }
+    .toLink:hover{
+      background:#f3f6ff;
+      color:#2b2b2b;
+    }
+
+    /* Message editor */
     .editor{
-      min-height:260px;
-      padding:12px 14px;
-      outline:none;
-      font-size:16px;
+      min-height: 260px;
+      padding: 12px 4px 10px;
+      outline: none;
+      border: none;
+      background: transparent;
+      line-height: 1.4;
+      font-size: 16px;
+      font-family: Arial, sans-serif;
+      white-space: pre-wrap;
     }
     .editor:empty:before{
-      content:"Type your email message here...";
-      color:#9aa0a6;
+      content: "Type your email message here...";
+      color: #9aa0a6;
     }
 
+    /* Toolbar below editor, above send */
     .toolbar{
-      border-top:1px solid var(--line);
-      border-bottom:1px solid var(--line);
-      background:var(--toolbar);
-      padding:6px 10px;
+      margin-top: 8px;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      background: var(--toolbar);
+      padding: 6px 10px;
       display:flex;
       gap:8px;
+      align-items:center;
+      flex-wrap: wrap;
     }
     .toolBtn{
-      width:30px;height:30px;border-radius:50%;
-      border:none;background:transparent;
-      cursor:pointer;
+      width: 30px;
+      height: 30px;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      background: transparent;
+      cursor: pointer;
+      display:grid;
+      place-items:center;
+      color:#3c4043;
+      font-size: 14px;
+      user-select:none;
     }
-    .toolBtn:hover{background:#e7eaed;}
+    .toolBtn:hover{
+      background:#e7eaed;
+      border-color:#d2d6da;
+    }
+    .toolSep{
+      width: 1px;
+      height: 22px;
+      background:#d2d6da;
+      margin: 0 2px;
+    }
+
+    /* Pop-up menus */
+    .menu{
+      position: fixed;
+      min-width: 170px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      padding: 6px;
+      display:none;
+      z-index: 9999;
+    }
+    .menu button{
+      width: 100%;
+      text-align: left;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+      color: var(--text);
+      font-size: 14px;
+    }
+    .menu button:hover{ background:#f3f6ff; }
 
     .actions{
       display:flex;
+      align-items:center;
       justify-content:space-between;
-      padding:12px 14px;
+      gap:12px;
+      padding: 12px 14px;
+      background: #fbfbff;
+    }
+    .btn{
+      border: 0;
+      border-radius: 999px;
+      padding: 10px 16px;
+      font-size: 15px;
+      cursor:pointer;
     }
     .btnPrimary{
-      background:var(--accent);
-      color:white;
-      border:none;
-      border-radius:999px;
-      padding:10px 16px;
-      cursor:pointer;
+      background: var(--accent);
+      color: white;
+      font-weight: 700;
     }
+    .btnPrimary:hover{ filter: brightness(0.95); }
     .btnGhost{
-      background:transparent;
-      border:1px solid var(--line);
-      border-radius:999px;
-      padding:10px 16px;
-      cursor:pointer;
+      background: transparent;
+      border: 1px solid var(--line);
+      color: var(--text);
     }
+    .btnGhost:hover{ background:#f3f6ff; }
 
     .result{
-      margin-top:14px;
-      padding:14px;
-      border-radius:14px;
-      border:1px solid var(--line);
-      background:white;
-      white-space:pre-wrap;
+      margin-top: 14px;
+      padding: 14px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: #ffffff;
+      box-shadow: 0 1px 2px rgba(0,0,0,.04);
+      white-space: pre-wrap;
+      font-size: 15px;
+    }
+
+    .credit{
+      margin-top: 10px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    @media (max-width: 560px){
+      .row{ grid-template-columns: 60px 1fr; }
+      .label{ font-size: 13px; }
     }
   </style>
 </head>
 
 <body>
-<div class="page">
-  <div class="topbar">
-    <div class="title">✉️ Writing An Email <span class="pill">For practice only</span></div>
-  </div>
+  <div class="page">
+    <div class="topbar">
+      <div class="title">
+        ✉️ Writing An Email
+        <span class="pill">For practice only.</span>
+      </div>
+      <div class="pill">No sign-in needed</div>
+    </div>
 
-  <div class="warn">
-    ⚠️ This is a practice email. No real emails will be sent.
-  </div>
+    <div class="warn">
+      <strong>⚠️ Safety reminder:</strong> Do not send your passwords, phone numbers, home addresses, or NRIC in an email.
+    </div>
 
-  <div class="compose">
-    <div class="composeHeader">
-      <strong>New Message</strong>
-      <div>
-        <span class="icon" id="minBtn">—</span>
-        <span class="icon" id="expBtn">▢</span>
-        <span class="icon" id="closeBtn">✕</span>
+    <div class="compose">
+      <div class="composeHeader">
+        <div class="left"><span class="dot"></span>New Message</div>
+        <div class="right">
+          <span class="icon" id="minBtn" title="Minimise: Hide the email box. Your writing is still there.">—</span>
+          <span class="icon" id="expBtn" title="Expand: Make the email box bigger.">▢</span>
+          <span class="icon" id="closeBtn" title="Close: Close the email. Your writing will disappear.">✕</span>
+        </div>
+      </div>
+
+      <div id="composeBody">
+        <div class="rows">
+          <div class="row">
+            <div class="label" title="To: Type the email address of the person you are writing to.">To</div>
+            <div class="toWrap">
+              <!-- no suggested email address -->
+              <input id="toInput" class="field" />
+              <div class="toActions">
+                <span class="toLink" title="Cc: Other people also get the email and everyone can see their names.">Cc</span>
+                <span class="toLink" title="Bcc: Other people get the email but their names are hidden.">Bcc</span>
+                <span title="People: This shows you can add more people.">👥</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="label" title="Subject: A short title to tell what your email is about.">Subject</div>
+            <!-- no suggested subject -->
+            <input id="subject" class="field" />
+          </div>
+
+          <div id="message" class="editor" contenteditable="true" spellcheck="true"></div>
+        </div>
+
+        <!-- Toolbar BELOW message, ABOVE send -->
+        <div class="toolbar" role="toolbar" aria-label="Formatting toolbar">
+          <button class="toolBtn" id="undoBtn" title="Undo: Go back one step.">↶</button>
+          <button class="toolBtn" id="redoBtn" title="Redo: Go forward one step.">↷</button>
+
+          <span class="toolSep" aria-hidden="true"></span>
+
+          <button class="toolBtn" id="fontBtn" title="Font: Choose Arial or Comic Sans.">🅵</button>
+          <button class="toolBtn" id="sizeBtn" title="Size: Choose normal or big text.">T↕</button>
+
+          <span class="toolSep" aria-hidden="true"></span>
+
+          <button class="toolBtn" id="boldBtn" title="Bold: Make letters darker and stronger."><b>B</b></button>
+          <button class="toolBtn" id="italicBtn" title="Italic: Make letters slant."><i>I</i></button>
+          <button class="toolBtn" id="underlineBtn" title="Underline: Draw a line under words."><u>U</u></button>
+
+          <span class="toolSep" aria-hidden="true"></span>
+
+          <button class="toolBtn" id="colorBtn" title="Colour: Choose black or red words.">A▾</button>
+
+          <span class="toolSep" aria-hidden="true"></span>
+
+          <button class="toolBtn" id="alignLeftBtn" title="Align left: Start near the left side.">≡</button>
+          <button class="toolBtn" id="alignCenterBtn" title="Align center: Put words in the middle.">≣</button>
+          <button class="toolBtn" id="alignRightBtn" title="Align right: Put words near the right side.">≡</button>
+
+          <span class="toolSep" aria-hidden="true"></span>
+
+          <button class="toolBtn" id="bulletBtn" title="Bullets: Make a dot list.">•</button>
+          <button class="toolBtn" id="numberBtn" title="Numbers: Make a 1,2,3 list.">1.</button>
+        </div>
+
+        <div class="actions">
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button class="btn btnPrimary" id="checkBtn">Send (Check)</button>
+            <button class="btn btnGhost" id="discardBtn" type="button">Discard</button>
+          </div>
+          <div class="pill">Feedback</div>
+        </div>
       </div>
     </div>
 
-    <div id="composeBody">
-      <div class="row">
-        <div class="label">To</div>
-        <input id="toInput" class="field">
-      </div>
+    <div id="output" class="result" style="display:none;"></div>
 
-      <div class="row">
-        <div class="label">Subject</div>
-        <input id="subject" class="field">
-      </div>
-
-      <div id="message" class="editor" contenteditable="true"></div>
-
-      <div class="toolbar">
-        <button class="toolBtn" onclick="document.execCommand('bold')"><b>B</b></button>
-        <button class="toolBtn" onclick="document.execCommand('italic')"><i>I</i></button>
-        <button class="toolBtn" onclick="document.execCommand('underline')"><u>U</u></button>
-      </div>
-
-      <div class="actions">
-        <button class="btnPrimary" id="checkBtn">Send (Check)</button>
-        <button class="btnGhost" id="discardBtn">Discard</button>
-      </div>
+    <div class="credit">
+      Created by Ms Violet Soh; supported by OpenAI technology.
     </div>
   </div>
 
-  <div id="output" class="result" style="display:none;"></div>
-</div>
+  <!-- Pop-up menus -->
+  <div class="menu" id="fontMenu" aria-label="Font menu">
+    <button type="button" data-font="Arial">Arial</button>
+    <button type="button" data-font="Comic Sans MS">Comic Sans</button>
+  </div>
 
-<script>
-const editor = document.getElementById("message");
-const output = document.getElementById("output");
-const body = document.getElementById("composeBody");
+  <div class="menu" id="sizeMenu" aria-label="Size menu">
+    <button type="button" data-size="normal">Normal</button>
+    <button type="button" data-size="big">Big</button>
+  </div>
 
-minBtn.onclick = () => body.style.display = body.style.display==="none"?"block":"none";
-expBtn.onclick = () => document.querySelector(".page").style.maxWidth="1180px";
-closeBtn.onclick = clearAll;
-discardBtn.onclick = clearAll;
+  <div class="menu" id="colorMenu" aria-label="Colour menu">
+    <button type="button" data-color="#000000">Black</button>
+    <button type="button" data-color="#d93025">Red</button>
+  </div>
 
-function clearAll(){
-  toInput.value="";
-  subject.value="";
-  editor.innerHTML="";
-  output.style.display="none";
-}
+  <script>
+    // --- Editor helpers ---
+    const editor = document.getElementById("message");
+    function focusEditor(){ editor.focus(); }
+    function cmd(command, value=null){
+      focusEditor();
+      document.execCommand(command, false, value);
+      focusEditor();
+    }
 
-function quickCheck({toText, subject, messageText}){
-  const good=[], improve=[];
-  if(toText.includes("@")) good.push("⭐ You typed an email address with @.");
-  else improve.push("🌱 Your email address needs an @ (example: name@school.edu).");
+    // --- Minimise / Expand / Close ---
+    const composeBody = document.getElementById("composeBody");
+    const output = document.getElementById("output");
 
-  if(subject.trim()) good.push("⭐ You wrote a subject.");
-  else improve.push("🌱 Add a subject to tell what your email is about.");
+    document.getElementById("minBtn").addEventListener("click", () => {
+      composeBody.style.display = (composeBody.style.display === "none") ? "block" : "none";
+    });
 
-  if(/^(dear|hi|hello)/i.test(messageText))
-    good.push("⭐ You used the correct salutation (e.g. Dear Mrs Wong,).");
-  else
-    improve.push("🌱 Start your email with a salutation (e.g. Dear Mrs Wong,).");
+    document.getElementById("expBtn").addEventListener("click", () => {
+      const page = document.querySelector(".page");
+      page.style.maxWidth = (page.style.maxWidth === "1180px") ? "980px" : "1180px";
+    });
 
-  if(/thank you|from|regards/i.test(messageText))
-    good.push("⭐ You signed off your email correctly.");
-  else
-    improve.push("🌱 End your email politely (e.g. Thank you. From, your name).");
+    function clearAll(){
+      document.getElementById("toInput").value = "";
+      document.getElementById("subject").value = "";
+      editor.innerHTML = "";
+      output.style.display = "none";
+      output.textContent = "";
+      composeBody.style.display = "block";
+      editor.style.fontFamily = "Arial, sans-serif";
+      editor.style.fontSize = "16px";
+      editor.style.color = "#000000";
+    }
+    document.getElementById("closeBtn").addEventListener("click", clearAll);
+    document.getElementById("discardBtn").addEventListener("click", clearAll);
 
-  return {good, improve};
-}
+    // --- Toolbar buttons ---
+    document.getElementById("undoBtn").addEventListener("click", () => cmd("undo"));
+    document.getElementById("redoBtn").addEventListener("click", () => cmd("redo"));
+    document.getElementById("boldBtn").addEventListener("click", () => cmd("bold"));
+    document.getElementById("italicBtn").addEventListener("click", () => cmd("italic"));
+    document.getElementById("underlineBtn").addEventListener("click", () => cmd("underline"));
+    document.getElementById("alignLeftBtn").addEventListener("click", () => cmd("justifyLeft"));
+    document.getElementById("alignCenterBtn").addEventListener("click", () => cmd("justifyCenter"));
+    document.getElementById("alignRightBtn").addEventListener("click", () => cmd("justifyRight"));
+    document.getElementById("bulletBtn").addEventListener("click", () => cmd("insertUnorderedList"));
+    document.getElementById("numberBtn").addEventListener("click", () => cmd("insertOrderedList"));
 
-checkBtn.onclick = () => {
-  const {good, improve} = quickCheck({
-    toText: toInput.value,
-    subject: subject.value,
-    messageText: editor.innerText
-  });
+    // --- Menus (Font / Size / Colour) ---
+    const fontBtn = document.getElementById("fontBtn");
+    const sizeBtn = document.getElementById("sizeBtn");
+    const colorBtn = document.getElementById("colorBtn");
+    const fontMenu = document.getElementById("fontMenu");
+    const sizeMenu = document.getElementById("sizeMenu");
+    const colorMenu = document.getElementById("colorMenu");
 
-  let text="Feedback\n\n";
-  good.forEach(g=>text+=g+"\n");
-  text+="\n"+(improve[0]||"⭐ Well done! Read through your email once more.")+
-        "\n\n🎯 Cyber Wellness Tip: Only email people you know and trust. Be polite and respectful when writing emails.";
+    function hideMenus(){
+      fontMenu.style.display = "none";
+      sizeMenu.style.display = "none";
+      colorMenu.style.display = "none";
+    }
 
-  output.style.display="block";
-  output.textContent=text;
-};
-</script>
+    function openMenu(menuEl, anchorEl){
+      const r = anchorEl.getBoundingClientRect();
+      hideMenus();
+      menuEl.style.left = Math.round(r.left) + "px";
+      menuEl.style.top  = Math.round(r.bottom + 6) + "px";
+      menuEl.style.display = "block";
+    }
+
+    fontBtn.addEventListener("click", (e) => { e.stopPropagation(); openMenu(fontMenu, fontBtn); });
+    sizeBtn.addEventListener("click", (e) => { e.stopPropagation(); openMenu(sizeMenu, sizeBtn); });
+    colorBtn.addEventListener("click", (e) => { e.stopPropagation(); openMenu(colorMenu, colorBtn); });
+
+    document.addEventListener("click", hideMenus);
+
+    // apply font (only Arial / Comic Sans)
+    fontMenu.querySelectorAll("button").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const font = btn.getAttribute("data-font");
+        editor.style.fontFamily = (font === "Comic Sans MS")
+          ? '"Comic Sans MS", "Comic Sans", cursive'
+          : "Arial, sans-serif";
+        cmd("fontName", font);
+        hideMenus();
+      });
+    });
+
+    // apply size (only Normal / Big)
+    sizeMenu.querySelectorAll("button").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const size = btn.getAttribute("data-size");
+        editor.style.fontSize = (size === "big") ? "20px" : "16px";
+        cmd("fontSize", (size === "big") ? "5" : "3");
+        hideMenus();
+      });
+    });
+
+    // apply colour (only Black / Red)
+    colorMenu.querySelectorAll("button").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const color = btn.getAttribute("data-color");
+        editor.style.color = color;
+        cmd("foreColor", color);
+        hideMenus();
+      });
+    });
+
+    // --- Feedback (NO "2 Stars + 1 Wish") ---
+    function buildFeedback({ toText, subject, messageText }) {
+      const good = [];
+      const improve = [];
+
+      const toTrim = (toText || "").trim();
+      const subjTrim = (subject || "").trim();
+      const msgTrim = (messageText || "").trim();
+
+      // Email address
+      if (toTrim.includes("@")) good.push("⭐ You typed an email address with @.");
+      else improve.push("🌱 Your email address needs an @ (example: name@school.edu).");
+
+      // Subject
+      if (subjTrim.length > 0) good.push("⭐ You wrote a subject.");
+      else improve.push("🌱 Add a subject to tell what your email is about.");
+
+      // Salutation
+      if (/^(dear|hi|hello)\s+[a-z]/i.test(msgTrim)) {
+        good.push("⭐ You used the correct salutation (e.g. Dear Mrs Wong,).");
+      } else {
+        improve.push("🌱 Start your email with a salutation (e.g. Dear Mrs Wong,).");
+      }
+
+      // Details (simple)
+      if (msgTrim.length >= 20) good.push("⭐ You wrote some details in your message.");
+      else improve.push("🌱 Add more details to your message.");
+
+      // Sign-off
+      if (/\bthank you\b|\bfrom\b|\bregards\b/i.test(msgTrim)) {
+        good.push("⭐ You signed off your email correctly.");
+      } else {
+        improve.push("🌱 End your email politely (e.g. Thank you. From, your name).");
+      }
+
+      // Keep it short for P3: show up to 3 good points, and 1 growth point
+      const goodToShow = good.slice(0, 3);
+      const improveToShow = improve[0];
+
+      let text = "Feedback\n\n";
+      if (goodToShow.length) {
+        goodToShow.forEach(line => text += line + "\n");
+        text += "\n";
+      }
+
+      if (improveToShow) {
+        text += improveToShow + "\n\n";
+      } else {
+        text += "⭐ Well done! Read your email once more to check spelling and punctuation.\n\n";
+      }
+
+      text += "🎯 Cyber Wellness Tip: Only email people you know and trust. Be polite and respectful when writing emails.";
+      return text;
+    }
+
+    function showFeedback(text){
+      output.style.display = "block";
+      output.textContent = text;
+      output.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    document.getElementById("checkBtn").addEventListener("click", () => {
+      const toText = document.getElementById("toInput").value;
+      const subject = document.getElementById("subject").value;
+      const messageText = editor.innerText;
+
+      showFeedback(buildFeedback({ toText, subject, messageText }));
+    });
+
+    // defaults
+    (function initDefaults(){
+      editor.style.fontFamily = "Arial, sans-serif";
+      editor.style.fontSize = "16px";
+      editor.style.color = "#000000";
+    })();
+  </script>
 </body>
 </html>
